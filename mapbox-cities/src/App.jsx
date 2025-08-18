@@ -49,9 +49,10 @@ function App() {
   useEffect(() => {
     if (!mapRef.current || locations.length === 0) return
 
-    const geocode = async (city) => {
+    const geocode = async (row) => {
+      const query = [row.City, row.Country].filter(Boolean).join(', ')
       const resp = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(city)}.json?access_token=${mapboxgl.accessToken}`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxgl.accessToken}`
       )
       if (!resp.ok) throw new Error('Geocoding failed')
       const data = await resp.json()
@@ -63,12 +64,12 @@ function App() {
     const addMarkers = async () => {
       for (const row of locations) {
         try {
-          const coords = await geocode(row.City)
+          const coords = await geocode(row)
           if (!coords) continue
           const popup = new mapboxgl.Popup({ offset: 24 }).setHTML(`
             <div style="max-width: 240px;">
               <div style="font-weight: 600; font-size: 14px; margin-bottom: 6px;">${row.Name || ''}</div>
-              <div style="font-size: 12px; color: #555;">${row.City}</div>
+              <div style="font-size: 12px; color: #555;">${[row.City, row.Country].filter(Boolean).join(', ')}</div>
               <div style="font-size: 12px; margin-top: 6px;">
                 <div><strong>Dates free:</strong> ${row['Dates free start'] || ''} → ${row['Dates free end'] || ''}</div>
                 <div><strong>Size:</strong> ${row.Size || ''}</div>
