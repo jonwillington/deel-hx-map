@@ -40,7 +40,7 @@ function App() {
     if (!mapContainerRef.current || mapRef.current) return
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current,
-      style: 'mapbox://styles/mapbox/streets-v12',
+      style: 'mapbox://styles/jonathanwillington/cm8ym2u5b003d01r431z7872k',
       center: [0, 20],
       zoom: 2
     })
