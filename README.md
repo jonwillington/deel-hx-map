@@ -1,6 +1,28 @@
-# Getting Started with Create React App
+# Google Sheets Viewer
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A React application that displays data from Google Sheets using the Google Sheets API. This project allows you to view and interact with spreadsheet data in a modern web interface.
+
+## Features
+
+- 📊 Real-time data fetching from Google Sheets
+- 🎨 Modern, responsive UI design
+- 📱 Mobile-friendly interface
+- 🔄 Automatic data refresh
+- 📋 Multi-sheet support
+- ⚡ Fast loading with error handling
+
+## Quick Start
+
+1. **Set up Google Sheets API credentials** (see [setup-google-sheets.md](./setup-google-sheets.md))
+2. **Test the connection:**
+   ```bash
+   npm run test-sheets
+   ```
+3. **Start the development server:**
+   ```bash
+   npm start
+   ```
+4. **Open your browser** to [http://localhost:3000](http://localhost:3000)
 
 ## Available Scripts
 
@@ -28,6 +50,10 @@ The build is minified and the filenames include the hashes.\
 Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+
+### `npm run test-sheets`
+
+Tests the Google Sheets API connection and displays basic information about the connected spreadsheet. Use this to verify your API credentials are working correctly.
 
 ### `npm run eject`
 
