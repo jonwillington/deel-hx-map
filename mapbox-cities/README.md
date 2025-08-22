@@ -1,12 +1,56 @@
-# React + Vite
+# Deel HX Map
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A premium property listing map application built with React, Mapbox GL JS, and Vite.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Interactive map with smooth panning and premium animations
+- Property filtering by type (Sublets/Exchange) and dates
+- Premium card interface with detailed property information
+- iOS-style segmented controls and switches
+- Responsive design with glass morphism effects
+- Bagoss Standard and Inter typography
 
-## Expanding the ESLint configuration
+## Setup
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+2. **Environment variables:**
+   Create a `.env` file in the root directory:
+   ```
+   VITE_MAPBOX_TOKEN=your_mapbox_token_here
+   VITE_SHEET_CSV=your_google_sheet_csv_url_here
+   ```
+
+3. **Run development server:**
+   ```bash
+   npm run dev
+   ```
+
+4. **Build for production:**
+   ```bash
+   npm run build
+   ```
+
+## GitHub Pages Deployment
+
+This project is configured for automatic deployment to GitHub Pages:
+
+1. The GitHub Actions workflow (`.github/workflows/deploy.yml`) will automatically build and deploy the app when you push to the `main` branch
+2. Your site will be available at: `https://jonwillington.github.io/deel-hx-map/`
+
+## Technologies Used
+
+- React 18
+- Mapbox GL JS
+- Vite
+- Papa Parse (CSV parsing)
+- CSS3 with modern features (backdrop-filter, etc.)
+
+## Fonts
+
+- **Bagoss Standard**: Used for location names and premium elements
+- **Inter**: Default font for all other text
