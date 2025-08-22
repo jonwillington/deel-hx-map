@@ -29,6 +29,9 @@ jobs:
       run: |
         cd mapbox-cities
         npm run build
+      env:
+        VITE_MAPBOX_TOKEN: ${{ secrets.VITE_MAPBOX_TOKEN }}
+        VITE_SHEET_CSV: ${{ secrets.VITE_SHEET_CSV }}
       
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
