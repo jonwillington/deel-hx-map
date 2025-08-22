@@ -21,21 +21,17 @@ jobs:
         cache: 'npm'
         
     - name: Install dependencies
-      run: |
-        cd mapbox-cities
-        npm ci
+      run: npm ci
       
     - name: Build
-      run: |
-        cd mapbox-cities
-        npm run build
+      run: npm run build
       env:
         VITE_MAPBOX_TOKEN: ${{ secrets.VITE_MAPBOX_TOKEN }}
         VITE_SHEET_CSV: ${{ secrets.VITE_SHEET_CSV }}
-      
+        
     - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3
       if: github.ref == 'refs/heads/main'
+      uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./mapbox-cities/dist
+        publish_dir: ./dist
