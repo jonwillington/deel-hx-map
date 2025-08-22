@@ -3,7 +3,7 @@ import mapboxgl from 'mapbox-gl'
 import Papa from 'papaparse'
 import './App.css'
 
-mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN
+mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1Ijoiam9uYXRoYW53aWxsaW5ndG9uIiwiYSI6ImNsZ2Z5Z2Z5Z2Z5Z2Z5Z2Z5Z2Z5Z2Z5Z2Z5In0.example'
 
 function App() {
   const mapContainerRef = useRef(null)
@@ -21,7 +21,7 @@ function App() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [showSkeletons, setShowSkeletons] = useState(true)
 
-  const csvUrl = useMemo(() => import.meta.env.VITE_SHEET_CSV, [])
+  const csvUrl = useMemo(() => import.meta.env.VITE_SHEET_CSV || 'https://docs.google.com/spreadsheets/d/14YSy-w-db4rqXa1nHyaPZCVp7Qcd3UcOBJOqfZXENdo/export?format=csv&gid=0', [])
 
   // Resolve listing type from row (supports multiple header names or falls back to column E)
   const getListingType = (row) => {
