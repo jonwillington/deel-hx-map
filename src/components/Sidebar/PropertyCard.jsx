@@ -10,7 +10,7 @@ import { getCountryFlag } from '../../utils/locationUtils'
  * @param {Function} props.onClick - Function to call when card is clicked
  * @returns {JSX.Element}
  */
-export const PropertyCard = ({ row, itemIndex, isActive, loading, onClick }) => {
+export const PropertyCard = ({ row, itemIndex, isActive, loading, onClick, style }) => {
   const getDisplayText = () => {
     if (row.Status && row.Status.toUpperCase() === 'ASK') {
       return 'Contact for availability'
@@ -38,6 +38,7 @@ export const PropertyCard = ({ row, itemIndex, isActive, loading, onClick }) => 
     <button 
       className={`small-card ${isActive ? 'active' : ''} ${!loading ? 'fade-in' : ''}`} 
       onClick={() => onClick(itemIndex)}
+      style={style}
     >
       <div className="small-card-content">
         {row.Photo && (

@@ -31,6 +31,7 @@ export const PropertyList = ({ filteredLocations, selectedIndex, loading, onSele
   })
   
   const elements = []
+  let staggerIndex = 0
   months.forEach(month => {
     // Add month header
     elements.push(
@@ -39,6 +40,12 @@ export const PropertyList = ({ filteredLocations, selectedIndex, loading, onSele
     
     // Add properties for this month
     locationsByMonth[month].forEach(({ row, indexInFiltered }) => {
+      // Ultra-premium stagger: luxuriously slow cascade
+      const groupIndex = Math.floor(staggerIndex / 3)
+      const itemInGroup = staggerIndex % 3
+      const baseDelay = groupIndex * 250 + itemInGroup * 120
+      const delay = Math.min(baseDelay, 2500)
+      
       elements.push(
         <PropertyCard
           key={indexInFiltered}
@@ -46,9 +53,12 @@ export const PropertyList = ({ filteredLocations, selectedIndex, loading, onSele
           itemIndex={indexInFiltered} // Pass the correct index
           isActive={indexInFiltered === selectedIndex}
           loading={loading}
+          // Airbnb-style premium stagger
+          style={!loading ? { animationDelay: `${delay}ms` } : undefined}
           onClick={onSelect}
         />
       )
+      staggerIndex += 1
     })
   })
   

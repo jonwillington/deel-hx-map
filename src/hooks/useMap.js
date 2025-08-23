@@ -11,7 +11,7 @@ mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1Ijoiam9uYXRo
  * @param {Function} onLocationSelect - Function to call when a location is selected
  * @returns {Object} Map state and functions
  */
-export const useMap = (locations, onLocationSelect) => {
+export const useMap = (locations, onLocationSelect, loading) => {
   const mapContainerRef = useRef(null)
   const mapRef = useRef(null)
   const markersRef = useRef([])
@@ -121,13 +121,16 @@ export const useMap = (locations, onLocationSelect) => {
     }
   }, [])
 
-  // Add markers when locations change
+  // Add markers when locations change and loading is complete
   useEffect(() => {
-    console.log('useMap: Locations changed, locations count:', locations.length)
-    if (!mapRef.current || !locations.length) {
-      console.log('useMap: No map ref or no locations, skipping markers')
+    console.log('useMap: Locations changed, locations count:', locations.length, 'loading:', loading)
+    if (!mapRef.current || !locations.length || loading) {
+      console.log('useMap: No map ref, no locations, or still loading - skipping markers')
       return
     }
+
+    // Add delay to let the list animation complete first
+    const markerDelay = setTimeout(() => {
 
     const addMarkers = async () => {
       console.log('useMap: Clearing existing markers, count:', markersRef.current.length)
@@ -168,7 +171,10 @@ export const useMap = (locations, onLocationSelect) => {
 
     console.log('useMap: Starting to add markers...')
     addMarkers()
-  }, [locations])
+    }, 3000) // Wait 3s for list animation to complete
+
+    return () => clearTimeout(markerDelay)
+  }, [locations, loading])
 
   // Handle location selection - just for map animation
   const handleLocationSelect = useCallback((index) => {
@@ -189,7 +195,18 @@ export const useMap = (locations, onLocationSelect) => {
       return
     }
     
-    // Do not modify marker styling; keep all markers static at their geolocated positions
+    // Highlight the selected marker with color change
+    markersRef.current.forEach((m) => {
+      const element = m.getElement()
+      const svg = element.querySelector('svg')
+      if (m === marker) {
+        // Active marker: purple color
+        if (svg) svg.style.fill = 'rgb(225, 215, 251)'
+      } else {
+        // Inactive markers: default dark color
+        if (svg) svg.style.fill = '#1a1a1a'
+      }
+    })
 
     // Subtly fade other markers during the spin to reduce visual noise
     markersRef.current.forEach((m) => {

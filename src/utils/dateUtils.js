@@ -68,6 +68,36 @@ export const formatPopupDate = (startDate, duration) => {
 }
 
 /**
+ * Format a date as a readable string like "4th April 2025"
+ * @param {string} dateStr - Date string in DD/MM/YY format
+ * @returns {string} Formatted date string
+ */
+export const formatReadableDate = (dateStr) => {
+  if (!dateStr) return 'Available'
+  
+  const date = parseDate(dateStr)
+  if (!date) return dateStr
+  
+  const day = date.getDate()
+  const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+  const monthName = monthNames[date.getMonth()]
+  const year = date.getFullYear()
+  
+  // Add ordinal suffix (1st, 2nd, 3rd, 4th, etc.)
+  const getOrdinalSuffix = (n) => {
+    if (n >= 11 && n <= 13) return 'th'
+    switch (n % 10) {
+      case 1: return 'st'
+      case 2: return 'nd'
+      case 3: return 'rd'
+      default: return 'th'
+    }
+  }
+  
+  return `${day}${getOrdinalSuffix(day)} ${monthName} ${year}`
+}
+
+/**
  * Get abbreviated month name from month number
  * @param {number} monthNum - Month number (1-12)
  * @returns {string} Abbreviated month name

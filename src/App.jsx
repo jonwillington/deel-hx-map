@@ -36,7 +36,7 @@ function App() {
   }
 
   // Map hook - must be after handleSelect is defined
-  const { mapContainerRef, handleLocationSelect } = useMap(filteredLocations, handleSelect)
+  const { mapContainerRef, handleLocationSelect } = useMap(filteredLocations, handleSelect, loading)
 
   // Handle segment change
   const handleSegmentChange = (segment) => {

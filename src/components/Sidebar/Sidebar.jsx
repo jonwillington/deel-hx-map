@@ -34,13 +34,16 @@ export const Sidebar = ({
       />
       
       <div className="sidebar-list">
-        <PropertyList 
-          filteredLocations={filteredLocations}
-          selectedIndex={selectedIndex}
-          loading={loading}
-          onSelect={onSelect}
-        />
-        
+        {/* Render list only after skeleton has fully faded out to avoid overlap/jump */}
+        {!loading && !showSkeletons && (
+          <PropertyList 
+            filteredLocations={filteredLocations}
+            selectedIndex={selectedIndex}
+            loading={loading}
+            onSelect={onSelect}
+          />
+        )}
+
         {loading && (
           Array.from({ length: 8 }).map((_, i) => (
             <div key={`skeleton-${i}`} className={`skeleton-card ${!showSkeletons ? 'fade-out' : ''}`}>

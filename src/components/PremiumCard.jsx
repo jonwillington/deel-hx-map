@@ -1,4 +1,5 @@
 import { getCountryFlag, getListingType } from '../utils/locationUtils'
+import { formatReadableDate } from '../utils/dateUtils'
 
 /**
  * Premium card component for displaying detailed property information
@@ -67,10 +68,11 @@ export const PremiumCard = ({ location, onClose }) => {
                 (() => {
                   if (!location.Start) return 'Not specified'
                   const duration = location['Duration '] || location.Duration || location.duration || ''
+                  const formattedDate = formatReadableDate(location.Start)
                   if (duration && typeof duration === 'string' && duration.trim()) {
-                    return `${location.Start} (${duration.trim()})`
+                    return `${formattedDate} (${duration.trim()})`
                   }
-                  return location.Start
+                  return formattedDate
                 })()
               }
             </div>
@@ -79,7 +81,7 @@ export const PremiumCard = ({ location, onClose }) => {
           {location['Dates free start 2'] && (
             <div className="premium-card-cell">
               <div className="premium-card-cell-label">Also Available From</div>
-              <div className="premium-card-cell-value">{location['Dates free start 2']}</div>
+              <div className="premium-card-cell-value">{formatReadableDate(location['Dates free start 2'])}</div>
             </div>
           )}
 
