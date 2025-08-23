@@ -149,7 +149,7 @@ export const useMap = (locations, onLocationSelect, loading) => {
         }
         console.log('useMap: Found coordinates:', coords, 'for:', row.City)
 
-        const marker = new mapboxgl.Marker({ color: '#1a1a1a' })
+        const marker = new mapboxgl.Marker({ color: '#ffdb5f' })
           .setLngLat(coords)
           .addTo(mapRef.current)
 
@@ -199,12 +199,15 @@ export const useMap = (locations, onLocationSelect, loading) => {
     markersRef.current.forEach((m) => {
       const element = m.getElement()
       const svg = element.querySelector('svg')
+      const innerCircle = element.querySelector('svg circle')
       if (m === marker) {
         // Active marker: purple color
         if (svg) svg.style.fill = 'rgb(225, 215, 251)'
+        if (innerCircle) innerCircle.style.fill = '#000'
       } else {
-        // Inactive markers: default dark color
-        if (svg) svg.style.fill = '#1a1a1a'
+        // Inactive markers: golden yellow
+        if (svg) svg.style.fill = '#ffdb5f'
+        if (innerCircle) innerCircle.style.fill = '#000'
       }
     })
 

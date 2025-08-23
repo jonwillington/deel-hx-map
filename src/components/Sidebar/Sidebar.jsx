@@ -24,10 +24,6 @@ export const Sidebar = ({
 }) => {
   return (
     <div className="sidebar">
-      <div className="sidebar-header">
-        Deel HX Map
-      </div>
-      
       <SegmentedControl 
         selectedSegment={selectedSegment}
         onSegmentChange={onSegmentChange}

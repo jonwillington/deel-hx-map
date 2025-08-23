@@ -67,14 +67,22 @@ export const PremiumCard = ({ location, onClose }) => {
                 'Contact for availability' :
                 (() => {
                   if (!location.Start) return 'Not specified'
-                  const duration = location['Duration '] || location.Duration || location.duration || ''
                   const formattedDate = formatReadableDate(location.Start)
-                  if (duration && typeof duration === 'string' && duration.trim()) {
-                    return `${formattedDate} (${duration.trim()})`
-                  }
                   return formattedDate
                 })()
               }
+            </div>
+          </div>
+
+          <div className="premium-card-cell">
+            <div className="premium-card-cell-label">Duration</div>
+            <div className="premium-card-cell-value">
+              {(() => {
+                const duration = location['Duration '] || location.Duration || location.duration || ''
+                return (duration && typeof duration === 'string' && duration.trim()) 
+                  ? duration.trim() 
+                  : 'Not specified'
+              })()}
             </div>
           </div>
 
