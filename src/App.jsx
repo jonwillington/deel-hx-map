@@ -17,8 +17,10 @@ function App() {
   const [currentLocation, setCurrentLocation] = useState(null)
   const [selectedSegment, setSelectedSegment] = useState('sublets')
   const [specificDates, setSpecificDates] = useState(false)
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const now = new Date()
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  })
   const [showSkeletons, setShowSkeletons] = useState(true)
 
   const csvUrl = useMemo(() => import.meta.env.VITE_SHEET_CSV || 'https://docs.google.com/spreadsheets/d/14YSy-w-db4rqXa1nHyaPZCVp7Qcd3UcOBJOqfZXENdo/export?format=csv&gid=0', [])
@@ -59,13 +61,13 @@ function App() {
         const startDate2 = row['Dates free start 2']
         const endDate2 = row['Dates free end 2']
         
-        // Parse the dates (assuming M/D/YY or MM/DD/YY format)
+        // Parse the dates (DD/MM/YY format)
         const parseDate = (dateStr) => {
           if (!dateStr || dateStr.trim() === '') return null
           const parts = dateStr.trim().split('/')
           if (parts.length !== 3) return null
-          const month = parseInt(parts[0]) - 1 // JS months are 0-indexed
-          const day = parseInt(parts[1])
+          const day = parseInt(parts[0])
+          const month = parseInt(parts[1]) - 1 // JS months are 0-indexed
           let year = parseInt(parts[2])
           // Handle 2-digit years
           if (year < 100) year += 2000
@@ -73,8 +75,9 @@ function App() {
         }
         
         // Target year/month to check against
-        const targetYear = selectedYear
-        const targetMonth = selectedMonth // 0-indexed
+        const [targetYearStr, targetMonthStr] = selectedDate.split('-')
+        const targetYear = parseInt(targetYearStr)
+        const targetMonth = parseInt(targetMonthStr) - 1 // Convert to 0-indexed
         
         // Check if any date range has overlap with the target month/year
         let hasOverlap = false
@@ -114,7 +117,7 @@ function App() {
       
       return true
     })
-  }, [locations, selectedSegment, specificDates, selectedMonth, selectedYear])
+  }, [locations, selectedSegment, specificDates, selectedDate])
 
   useEffect(() => {
     if (!csvUrl) {
@@ -233,21 +236,30 @@ function App() {
                 ${row.Status && row.Status.toUpperCase() === 'ASK' ? 
                   `<div><strong>Status:</strong> ${row.Status} - Contact for availability</div>` :
                   (() => {
+                    const formatPopupDate = (startDate, duration) => {
+                      if (!startDate) return ''
+                      if (duration && typeof duration === 'string' && duration.trim()) {
+                        return `${startDate} (${duration.trim()})`
+                      }
+                      return startDate
+                    }
+                    
                     const dates = []
-                    if (row.Start && row.End) {
-                      dates.push(`${row.Start} → ${row.End}`)
+                    if (row.Start) {
+                      const duration = row.Duration || row.duration || ''
+                      dates.push(formatPopupDate(row.Start, duration))
                     }
-                    if (row['Dates free start 2'] && row['Dates free end 2']) {
-                      dates.push(`${row['Dates free start 2']} → ${row['Dates free end 2']}`)
+                    if (row['Dates free start 2']) {
+                      dates.push(formatPopupDate(row['Dates free start 2'], ''))
                     }
-                    return dates.length > 0 ? `<div><strong>Dates free:</strong> ${dates.join(' • ')}</div>` : '<div><strong>Dates:</strong> No dates specified</div>'
+                    return dates.length > 0 ? `<div><strong>Available from:</strong> ${dates.join(' • ')}</div>` : '<div><strong>Dates:</strong> No dates specified</div>'
                   })()
                 }
                 <div><strong>Size:</strong> ${row.Size || row.size || ''}</div>
                 ${row.Status && row.Status.toUpperCase() !== 'ASK' ? `<div><strong>Status:</strong> ${row.Status}</div>` : ''}
-                ${row['Any notes'] ? `<div style=\"margin-top: 6px;\"><strong>Notes:</strong> ${row['Any notes']}</div>` : ''}
+                ${row['Any notes'] ? `<div style="margin-top: 6px;"><strong>Notes:</strong> ${row['Any notes']}</div>` : ''}
               </div>
-              ${row.Photo ? `<div style=\"margin-top: 8px;\"><img alt=\"Photo\" style=\"width: 100%; height: auto; border-radius: 6px;\" src=\"${row.Photo}\" /></div>` : ''}
+              ${row.Photo ? `<div style="margin-top: 8px;"><img alt="Photo" style="width: 100%; height: auto; border-radius: 6px;" src="${row.Photo}" /></div>` : ''}
             </div>
           `)
           const marker = new mapboxgl.Marker()
@@ -574,24 +586,28 @@ function App() {
             </div>
             
             <div className="premium-card-cell">
-              <div className="premium-card-cell-label">Start Date</div>
+              <div className="premium-card-cell-label">Available From</div>
               <div className="premium-card-cell-value">
                 {location.Status && location.Status.toUpperCase() === 'ASK' ? 
                   'Contact for availability' :
-                  location.Start || 'Not specified'
+                  (() => {
+                    if (!location.Start) return 'Not specified'
+                    const duration = location.Duration || location.duration || ''
+                    if (duration && typeof duration === 'string' && duration.trim()) {
+                      return `${location.Start} (${duration.trim()})`
+                    }
+                    return location.Start
+                  })()
                 }
               </div>
             </div>
 
-            <div className="premium-card-cell">
-              <div className="premium-card-cell-label">End Date</div>
-              <div className="premium-card-cell-value">
-                {location.Status && location.Status.toUpperCase() === 'ASK' ? 
-                  'Contact for availability' :
-                  location.End || 'Not specified'
-                }
+            {location['Dates free start 2'] && (
+              <div className="premium-card-cell">
+                <div className="premium-card-cell-label">Also Available From</div>
+                <div className="premium-card-cell-value">{location['Dates free start 2']}</div>
               </div>
-            </div>
+            )}
 
             <div className="premium-card-cell">
               <div className="premium-card-cell-label">Size</div>
@@ -663,35 +679,26 @@ function App() {
             <>
               <div className="hairline-divider"></div>
               <div className="date-selectors">
-                <div className="month-selector">
+                <div className="month-year-selector">
                   <select 
-                    value={selectedMonth} 
-                    onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                    value={selectedDate} 
+                    onChange={(e) => setSelectedDate(e.target.value)}
                     className="ios-select"
                   >
-                    <option value={0}>January</option>
-                    <option value={1}>February</option>
-                    <option value={2}>March</option>
-                    <option value={3}>April</option>
-                    <option value={4}>May</option>
-                    <option value={5}>June</option>
-                    <option value={6}>July</option>
-                    <option value={7}>August</option>
-                    <option value={8}>September</option>
-                    <option value={9}>October</option>
-                    <option value={10}>November</option>
-                    <option value={11}>December</option>
-                  </select>
-                </div>
-                <div className="year-selector">
-                  <select 
-                    value={selectedYear} 
-                    onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                    className="ios-select"
-                  >
-                    {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() + i).map(year => (
-                      <option key={year} value={year}>{year}</option>
-                    ))}
+                    {(() => {
+                      const options = []
+                      const now = new Date()
+                      for (let i = 0; i < 12; i++) {
+                        const date = new Date(now.getFullYear(), now.getMonth() + i, 1)
+                        const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+                        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+                        const label = `${monthNames[date.getMonth()]} ${date.getFullYear()}`
+                        options.push(
+                          <option key={value} value={value}>{label}</option>
+                        )
+                      }
+                      return options
+                    })()}
                   </select>
                 </div>
               </div>
@@ -700,8 +707,66 @@ function App() {
         </div>
         
         <div className="sidebar-list">
-          {filteredLocations.map((row, i) => (
-            <button key={i} className={`small-card ${i === selectedIndex ? 'active' : ''} ${!loading ? 'fade-in' : ''}`} onClick={() => handleSelect(i)}>
+          {(() => {
+            // Group locations by year
+            const locationsByYear = {}
+            filteredLocations.forEach((row, originalIndex) => {
+              // Get the earliest year from the property's dates
+              const getEarliestYear = (row) => {
+                const parseDate = (dateStr) => {
+                  if (!dateStr || dateStr.trim() === '') return null
+                  const parts = dateStr.trim().split('/')
+                  if (parts.length !== 3) return null
+                  const day = parseInt(parts[0])
+                  const month = parseInt(parts[1]) - 1
+                  let year = parseInt(parts[2])
+                  if (year < 100) year += 2000
+                  return new Date(year, month, day)
+                }
+
+                const dates = []
+                if (row.Start) {
+                  const date = parseDate(row.Start)
+                  if (date) dates.push(date)
+                }
+                if (row['Dates free start 2']) {
+                  const date = parseDate(row['Dates free start 2'])
+                  if (date) dates.push(date)
+                }
+
+                if (dates.length === 0) return null
+                return Math.min(...dates.map(d => d.getFullYear()))
+              }
+
+              const year = getEarliestYear(row) || 'No dates'
+              if (!locationsByYear[year]) {
+                locationsByYear[year] = []
+              }
+              locationsByYear[year].push({ row, originalIndex })
+            })
+
+            // Sort years
+            const years = Object.keys(locationsByYear).sort((a, b) => {
+              if (a === 'No dates') return 1
+              if (b === 'No dates') return -1
+              return parseInt(a) - parseInt(b)
+            })
+
+            const elements = []
+            years.forEach(year => {
+              // Add year header (except for 'No dates' if it's the only group, and not when specific dates is active)
+              if (!specificDates && (years.length > 1 || year !== 'No dates')) {
+                elements.push(
+                  <div key={`year-${year}`} className="year-separator">
+                    <div className="year-separator-text">{year}</div>
+                  </div>
+                )
+              }
+
+              // Add properties for this year
+              locationsByYear[year].forEach(({ row, originalIndex }) => {
+                elements.push(
+                  <button key={originalIndex} className={`small-card ${originalIndex === selectedIndex ? 'active' : ''} ${!loading ? 'fade-in' : ''}`} onClick={() => handleSelect(originalIndex)}>
               <div className="small-card-content">
                 {row.Photo && (
                   <div className="small-card-photo">
@@ -712,64 +777,75 @@ function App() {
                   <div className="small-card-location" style={{ fontSize: '18px', fontWeight: '500', marginBottom: '2px', letterSpacing: '-0.3px', fontFamily: 'Bagoss Standard, sans-serif' }}>
                     {row.City || ''} {getCountryFlag(row.Country)}
                   </div>
-                  <div className="small-card-dates" style={{ fontSize: '14px', fontWeight: '600', color: '#888', marginBottom: '16px', letterSpacing: '-0.3px' }}>
+                  <div className="small-card-dates" style={{ fontSize: '14px', fontWeight: '600', color: '#888', letterSpacing: '-0.3px' }}>
                     {(() => {
                       if (row.Status && row.Status.toUpperCase() === 'ASK') {
                         return 'Contact for availability'
                       }
                       
-                      // Parse dates to get month/year info
-                      const formatDateRange = (startDate, endDate) => {
-                        if (!startDate || !endDate) return ''
+                      // Format for date • duration • size
+                      const formatDate = (startDate) => {
+                        if (!startDate) return ''
                         const parseDate = (dateStr) => {
                           const parts = dateStr.split('/')
                           if (parts.length !== 3) return null
-                          const month = parseInt(parts[0]) - 1
+                          const day = parseInt(parts[0])
+                          const month = parseInt(parts[1]) - 1 // JS months are 0-indexed
                           let year = parseInt(parts[2])
                           if (year < 100) year += 2000
-                          return new Date(year, month, 1)
+                          return new Date(year, month, day)
                         }
                         
                         const start = parseDate(startDate)
-                        const end = parseDate(endDate)
-                        if (!start || !end) return `${startDate} → ${endDate}`
+                        if (!start) return startDate
                         
                         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-                        if (start.getFullYear() === end.getFullYear() && start.getMonth() === end.getMonth()) {
-                          return `${monthNames[start.getMonth()]} ${start.getFullYear()}`
-                        } else {
-                          return `${monthNames[start.getMonth()]} ${start.getFullYear()} - ${monthNames[end.getMonth()]} ${end.getFullYear()}`
+                        return `${monthNames[start.getMonth()]} ${start.getFullYear()}`
+                      }
+                      
+                      // Build the display string: date • duration • size
+                      const parts = []
+                      
+                      // Add date part
+                      if (row.Start) {
+                        const dates = [formatDate(row.Start)]
+                        if (row['Dates free start 2']) {
+                          dates.push(formatDate(row['Dates free start 2']))
                         }
+                        
+                        if (dates.length > 1) {
+                          parts.push('Multiple dates')
+                        } else {
+                          parts.push(dates[0])
+                        }
+                      } else {
+                        parts.push('Flexible')
                       }
                       
-                      const dates = []
-                      if (row.Start && row.End) {
-                        dates.push(formatDateRange(row.Start, row.End))
-                      }
-                      if (row['Dates free start 2'] && row['Dates free end 2']) {
-                        dates.push(formatDateRange(row['Dates free start 2'], row['Dates free end 2']))
+                      // Add duration part
+                      const duration = row.Duration || row.duration || ''
+                      if (duration && duration.trim()) {
+                        parts.push(duration.trim())
                       }
                       
-                      let dateText = ''
-                      if (dates.length === 0) dateText = 'Flexible'
-                      else if (dates.length > 1) dateText = 'Multiple'
-                      else dateText = dates[0]
-                      
-                      // Add Size from column K if available
+                      // Add size part
                       const size = row.Size
                       if (size && size.trim()) {
-                        return `${dateText} • ${size}`
+                        parts.push(size.trim())
                       }
-                      return dateText
+                      
+                      return parts.join(' • ')
                     })()}
-                  </div>
-                  <div className="small-card-name" style={{ fontSize: '12px', color: '#666', fontWeight: '500', letterSpacing: '-0.3px' }}>
-                    {row.Name || 'Unnamed'}
                   </div>
                 </div>
               </div>
             </button>
-          ))}
+                )
+              })
+            })
+
+            return elements
+          })()}
           {loading && (
             Array.from({ length: 8 }).map((_, i) => (
               <div key={`skeleton-${i}`} className={`skeleton-card ${!showSkeletons ? 'fade-out' : ''}`}>
@@ -788,12 +864,18 @@ function App() {
         </div>
       </div>
 
-      {loading && <div style={{ position: 'absolute', zIndex: 2, left: 336, top: 12, padding: '8px', background: 'rgba(255,255,255,0.95)', borderRadius: 6, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>Loading…</div>}
-      {error && <div style={{ position: 'absolute', zIndex: 2, left: 336, top: 12, padding: '8px', background: '#fee', color: '#900', borderRadius: 6, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>{error}</div>}
+      <div className="map-area">
+        {loading && <div style={{ position: 'absolute', zIndex: 2, left: 16, top: 12, padding: '8px', background: 'rgba(255,255,255,0.95)', borderRadius: 6, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>Loading…</div>}
+        {error && <div style={{ position: 'absolute', zIndex: 2, left: 16, top: 12, padding: '8px', background: '#fee', color: '#900', borderRadius: 6, boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>{error}</div>}
 
-      <div ref={mapContainerRef} style={{ position: 'absolute', inset: 0 }} />
-      
-      {showPremiumCard && <PremiumCard location={currentLocation} />}
+        <div ref={mapContainerRef} style={{ position: 'absolute', inset: 0 }} />
+        
+        {showPremiumCard && <PremiumCard location={currentLocation} />}
+        
+        <div className="feedback-bar">
+          Got any feature suggestions or feedback? Send them <a href="https://google.com" target="_blank" rel="noopener noreferrer">here!</a>
+        </div>
+      </div>
     </div>
   )
 }
