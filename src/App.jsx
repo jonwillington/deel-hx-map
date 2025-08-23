@@ -16,11 +16,6 @@ function App() {
   const [showPremiumCard, setShowPremiumCard] = useState(false)
   const [currentLocation, setCurrentLocation] = useState(null)
   const [selectedSegment, setSelectedSegment] = useState('sublets')
-  const [specificDates, setSpecificDates] = useState(false)
-  const [selectedDate, setSelectedDate] = useState(() => {
-    const now = new Date()
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
-  })
   const [showSkeletons, setShowSkeletons] = useState(true)
 
   const csvUrl = useMemo(() => import.meta.env.VITE_SHEET_CSV || 'https://docs.google.com/spreadsheets/d/14YSy-w-db4rqXa1nHyaPZCVp7Qcd3UcOBJOqfZXENdo/export?format=csv&gid=0', [])
@@ -41,7 +36,7 @@ function App() {
     return ''
   }
 
-  // Filter locations based on selected segment and dates
+  // Filter locations based on selected segment
   const filteredLocations = useMemo(() => {
     if (!locations || locations.length === 0) return []
     return locations.filter((row) => {
@@ -51,73 +46,9 @@ function App() {
       if (selectedSegment === 'sublets') segmentMatch = t === 'sublets'
       else if (selectedSegment === 'exchange') segmentMatch = t === 'exchange'
       
-      if (!segmentMatch) return false
-      
-      // Filter by dates if specific dates is enabled
-      if (specificDates) {
-        // Check both sets of date ranges
-        const startDate1 = row['Start']
-        const endDate1 = row['End']
-        const startDate2 = row['Dates free start 2']
-        const endDate2 = row['Dates free end 2']
-        
-        // Parse the dates (DD/MM/YY format)
-        const parseDate = (dateStr) => {
-          if (!dateStr || dateStr.trim() === '') return null
-          const parts = dateStr.trim().split('/')
-          if (parts.length !== 3) return null
-          const day = parseInt(parts[0])
-          const month = parseInt(parts[1]) - 1 // JS months are 0-indexed
-          let year = parseInt(parts[2])
-          // Handle 2-digit years
-          if (year < 100) year += 2000
-          return new Date(year, month, day)
-        }
-        
-        // Target year/month to check against
-        const [targetYearStr, targetMonthStr] = selectedDate.split('-')
-        const targetYear = parseInt(targetYearStr)
-        const targetMonth = parseInt(targetMonthStr) - 1 // Convert to 0-indexed
-        
-        // Check if any date range has overlap with the target month/year
-        let hasOverlap = false
-        
-        // Check first date range
-        if (startDate1 && endDate1) {
-          const start1 = parseDate(startDate1)
-          const end1 = parseDate(endDate1)
-          if (start1 && end1) {
-            // Check if this range includes the target month/year
-            if ((start1.getFullYear() < targetYear || 
-                (start1.getFullYear() === targetYear && start1.getMonth() <= targetMonth)) &&
-                (end1.getFullYear() > targetYear || 
-                (end1.getFullYear() === targetYear && end1.getMonth() >= targetMonth))) {
-              hasOverlap = true
-            }
-          }
-        }
-        
-        // Check second date range if first didn't match
-        if (!hasOverlap && startDate2 && endDate2) {
-          const start2 = parseDate(startDate2)
-          const end2 = parseDate(endDate2)
-          if (start2 && end2) {
-            // Check if this range includes the target month/year
-            if ((start2.getFullYear() < targetYear || 
-                (start2.getFullYear() === targetYear && start2.getMonth() <= targetMonth)) &&
-                (end2.getFullYear() > targetYear || 
-                (end2.getFullYear() === targetYear && end2.getMonth() >= targetMonth))) {
-              hasOverlap = true
-            }
-          }
-        }
-        
-        return hasOverlap
-      }
-      
-      return true
+      return segmentMatch
     })
-  }, [locations, selectedSegment, specificDates, selectedDate])
+  }, [locations, selectedSegment])
 
   useEffect(() => {
     if (!csvUrl) {
@@ -131,6 +62,7 @@ function App() {
       dynamicTyping: false,
       complete: (results) => {
         const rows = (results.data || []).filter(r => r && (r.City || r.city))
+
         setLocations(rows)
         // Trigger skeleton fade-out first, then remove them after animation
         setTimeout(() => {
@@ -246,7 +178,7 @@ function App() {
                     
                     const dates = []
                     if (row.Start) {
-                      const duration = row.Duration || row.duration || ''
+                      const duration = row['Duration '] || row.Duration || row.duration || ''
                       dates.push(formatPopupDate(row.Start, duration))
                     }
                     if (row['Dates free start 2']) {
@@ -664,187 +596,119 @@ function App() {
           </button>
         </div>
         
-        <div className="switch-cell">
-          <div className="switch-row">
-            <div className="switch-label">Specific dates</div>
-            <button 
-              className={`ios-switch ${specificDates ? 'active' : ''}`}
-              onClick={() => setSpecificDates(!specificDates)}
-            >
-              <div className="switch-thumb"></div>
-            </button>
-          </div>
-          
-          {specificDates && (
-            <>
-              <div className="hairline-divider"></div>
-              <div className="date-selectors">
-                <div className="month-year-selector">
-                  <select 
-                    value={selectedDate} 
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    className="ios-select"
-                  >
-                    {(() => {
-                      const options = []
-                      const now = new Date()
-                      for (let i = 0; i < 12; i++) {
-                        const date = new Date(now.getFullYear(), now.getMonth() + i, 1)
-                        const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-                        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-                        const label = `${monthNames[date.getMonth()]} ${date.getFullYear()}`
-                        options.push(
-                          <option key={value} value={value}>{label}</option>
-                        )
-                      }
-                      return options
-                    })()}
-                  </select>
-                </div>
-              </div>
-            </>
-          )}
-        </div>
+
         
         <div className="sidebar-list">
           {(() => {
-            // Group locations by year
-            const locationsByYear = {}
-            filteredLocations.forEach((row, originalIndex) => {
-              // Get the earliest year from the property's dates
-              const getEarliestYear = (row) => {
-                const parseDate = (dateStr) => {
-                  if (!dateStr || dateStr.trim() === '') return null
-                  const parts = dateStr.trim().split('/')
-                  if (parts.length !== 3) return null
-                  const day = parseInt(parts[0])
-                  const month = parseInt(parts[1]) - 1
-                  let year = parseInt(parts[2])
-                  if (year < 100) year += 2000
-                  return new Date(year, month, day)
+            // Always group properties by month
+              const locationsByMonth = {}
+              filteredLocations.forEach((row, originalIndex) => {
+                const getPropertyMonth = (row) => {
+                  // If property has a start date, use that month
+                  if (row.Start) {
+                    const parseDate = (dateStr) => {
+                      if (!dateStr || dateStr.trim() === '') return null
+                      const parts = dateStr.trim().split('/')
+                      if (parts.length !== 3) return null
+                      const day = parseInt(parts[0])
+                      const month = parseInt(parts[1]) - 1
+                      let year = parseInt(parts[2])
+                      if (year < 100) year += 2000
+                      return new Date(year, month, day)
+                    }
+                    
+                    const start = parseDate(row.Start)
+                    if (start) {
+                      return `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}`
+                    }
+                  }
+                  
+                  // If no start date, group under "FLEXIBLE"
+                  return 'FLEXIBLE'
                 }
-
-                const dates = []
-                if (row.Start) {
-                  const date = parseDate(row.Start)
-                  if (date) dates.push(date)
+                
+                const month = getPropertyMonth(row)
+                if (!locationsByMonth[month]) {
+                  locationsByMonth[month] = []
                 }
-                if (row['Dates free start 2']) {
-                  const date = parseDate(row['Dates free start 2'])
-                  if (date) dates.push(date)
-                }
-
-                if (dates.length === 0) return null
-                return Math.min(...dates.map(d => d.getFullYear()))
-              }
-
-              const year = getEarliestYear(row) || 'No dates'
-              if (!locationsByYear[year]) {
-                locationsByYear[year] = []
-              }
-              locationsByYear[year].push({ row, originalIndex })
-            })
-
-            // Sort years
-            const years = Object.keys(locationsByYear).sort((a, b) => {
-              if (a === 'No dates') return 1
-              if (b === 'No dates') return -1
-              return parseInt(a) - parseInt(b)
-            })
-
-            const elements = []
-            years.forEach(year => {
-              // Add year header (except for 'No dates' if it's the only group, and not when specific dates is active)
-              if (!specificDates && (years.length > 1 || year !== 'No dates')) {
-                elements.push(
-                  <div key={`year-${year}`} className="year-separator">
-                    <div className="year-separator-text">{year}</div>
-                  </div>
-                )
-              }
-
-              // Add properties for this year
-              locationsByYear[year].forEach(({ row, originalIndex }) => {
-                elements.push(
-                  <button key={originalIndex} className={`small-card ${originalIndex === selectedIndex ? 'active' : ''} ${!loading ? 'fade-in' : ''}`} onClick={() => handleSelect(originalIndex)}>
-              <div className="small-card-content">
-                {row.Photo && (
-                  <div className="small-card-photo">
-                    <img src={row.Photo} alt="Property" style={{ height: '100%', width: '100%', objectFit: 'cover' }} />
-                  </div>
-                )}
-                <div className="small-card-details">
-                  <div className="small-card-location" style={{ fontSize: '18px', fontWeight: '500', marginBottom: '2px', letterSpacing: '-0.3px', fontFamily: 'Bagoss Standard, sans-serif' }}>
-                    {row.City || ''} {getCountryFlag(row.Country)}
-                  </div>
-                  <div className="small-card-dates" style={{ fontSize: '14px', fontWeight: '600', color: '#888', letterSpacing: '-0.3px' }}>
-                    {(() => {
-                      if (row.Status && row.Status.toUpperCase() === 'ASK') {
-                        return 'Contact for availability'
-                      }
-                      
-                      // Format for date • duration • size
-                      const formatDate = (startDate) => {
-                        if (!startDate) return ''
-                        const parseDate = (dateStr) => {
-                          const parts = dateStr.split('/')
-                          if (parts.length !== 3) return null
-                          const day = parseInt(parts[0])
-                          const month = parseInt(parts[1]) - 1 // JS months are 0-indexed
-                          let year = parseInt(parts[2])
-                          if (year < 100) year += 2000
-                          return new Date(year, month, day)
-                        }
-                        
-                        const start = parseDate(startDate)
-                        if (!start) return startDate
-                        
-                        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-                        return `${monthNames[start.getMonth()]} ${start.getFullYear()}`
-                      }
-                      
-                      // Build the display string: date • duration • size
-                      const parts = []
-                      
-                      // Add date part
-                      if (row.Start) {
-                        const dates = [formatDate(row.Start)]
-                        if (row['Dates free start 2']) {
-                          dates.push(formatDate(row['Dates free start 2']))
-                        }
-                        
-                        if (dates.length > 1) {
-                          parts.push('Multiple dates')
-                        } else {
-                          parts.push(dates[0])
-                        }
-                      } else {
-                        parts.push('Flexible')
-                      }
-                      
-                      // Add duration part
-                      const duration = row.Duration || row.duration || ''
-                      if (duration && duration.trim()) {
-                        parts.push(duration.trim())
-                      }
-                      
-                      // Add size part
-                      const size = row.Size
-                      if (size && size.trim()) {
-                        parts.push(size.trim())
-                      }
-                      
-                      return parts.join(' • ')
-                    })()}
-                  </div>
-                </div>
-              </div>
-            </button>
-                )
+                locationsByMonth[month].push({ row, originalIndex })
               })
-            })
+              
+              // Sort months
+              const months = Object.keys(locationsByMonth).sort((a, b) => {
+                if (a === 'FLEXIBLE') return 1
+                if (b === 'FLEXIBLE') return -1
+                return a.localeCompare(b)
+              })
+              
+              const elements = []
+              months.forEach(month => {
+                // Add month header
+                if (month === 'FLEXIBLE') {
+                  elements.push(
+                    <div key={`month-${month}`} className="year-separator">
+                      <div className="year-separator-text">FLEXIBLE</div>
+                    </div>
+                  )
+                } else {
+                  const [year, monthNum] = month.split('-')
+                  const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+                  const monthName = monthNames[parseInt(monthNum) - 1]
+                  
+                  elements.push(
+                    <div key={`month-${month}`} className="year-separator">
+                      <div className="year-separator-text">{monthName} {year}</div>
+                    </div>
+                  )
+                }
+                
+                                // Add properties for this month
+                locationsByMonth[month].forEach(({ row, originalIndex }) => {
+                  elements.push(
+                    <button key={originalIndex} className={`small-card ${originalIndex === selectedIndex ? 'active' : ''} ${!loading ? 'fade-in' : ''}`} onClick={() => handleSelect(originalIndex)}>
+                      <div className="small-card-content">
+                        {row.Photo && (
+                          <div className="small-card-photo">
+                            <img src={row.Photo} alt="Property" style={{ height: '100%', width: '100%', objectFit: 'cover' }} />
+                          </div>
+                        )}
+                        <div className="small-card-details">
+                          <div className="small-card-location" style={{ fontSize: '18px', fontWeight: '500', marginBottom: '2px', letterSpacing: '-0.3px', fontFamily: 'Bagoss Standard, sans-serif' }}>
+                            {row.City || ''} {getCountryFlag(row.Country)}
+                          </div>
+                          <div className="small-card-dates" style={{ fontSize: '14px', fontWeight: '600', color: '#888', letterSpacing: '-0.3px' }}>
+                            {(() => {
+                              if (row.Status && row.Status.toUpperCase() === 'ASK') {
+                                return 'Contact for availability'
+                              }
+                              
+                              // Build the display string: duration • size (no date since we have month dividers)
+                              const parts = []
+                              
+                              // Add duration part
+                              const duration = row['Duration '] || row.Duration || row.duration || ''
+                              if (duration && duration.trim()) {
+                                parts.push(duration.trim())
+                              }
+                              
+                              // Add size part
+                              const size = row.Size
+                              if (size && size.trim()) {
+                                parts.push(size.trim())
+                              }
+                              
+                              return parts.length > 0 ? parts.join(' • ') : 'Available'
+                            })()}
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  )
+                })
+              })
+              
+              return elements
 
-            return elements
           })()}
           {loading && (
             Array.from({ length: 8 }).map((_, i) => (
