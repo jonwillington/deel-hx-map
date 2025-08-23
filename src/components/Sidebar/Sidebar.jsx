@@ -1,0 +1,65 @@
+import { SegmentedControl } from './SegmentedControl'
+import { PropertyList } from './PropertyList'
+
+/**
+ * Main sidebar component
+ * @param {Object} props
+ * @param {Array} props.filteredLocations - Array of filtered location data
+ * @param {number} props.selectedIndex - Currently selected property index
+ * @param {boolean} props.loading - Whether the app is in loading state
+ * @param {boolean} props.showSkeletons - Whether to show loading skeletons
+ * @param {string} props.selectedSegment - Currently selected segment
+ * @param {Function} props.onSelect - Function to call when a property is selected
+ * @param {Function} props.onSegmentChange - Function to call when segment changes
+ * @returns {JSX.Element}
+ */
+export const Sidebar = ({ 
+  filteredLocations, 
+  selectedIndex, 
+  loading, 
+  showSkeletons, 
+  selectedSegment, 
+  onSelect, 
+  onSegmentChange 
+}) => {
+  return (
+    <div className="sidebar">
+      <div className="sidebar-header">
+        Deel HX Map
+      </div>
+      
+      <SegmentedControl 
+        selectedSegment={selectedSegment}
+        onSegmentChange={onSegmentChange}
+      />
+      
+      <div className="sidebar-list">
+        <PropertyList 
+          filteredLocations={filteredLocations}
+          selectedIndex={selectedIndex}
+          loading={loading}
+          onSelect={onSelect}
+        />
+        
+        {loading && (
+          Array.from({ length: 8 }).map((_, i) => (
+            <div key={`skeleton-${i}`} className={`skeleton-card ${!showSkeletons ? 'fade-out' : ''}`}>
+              <div className="skeleton-card-content">
+                <div className="skeleton-photo"></div>
+                <div className="skeleton-details">
+                  <div className="skeleton-location"></div>
+                  <div className="skeleton-dates"></div>
+                  <div className="skeleton-name"></div>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+        
+        {filteredLocations.length === 0 && !loading && (
+          <div className="empty">No properties</div>
+        )}
+      </div>
+    </div>
+  )
+}
