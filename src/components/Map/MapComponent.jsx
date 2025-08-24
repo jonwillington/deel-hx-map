@@ -21,15 +21,22 @@ export const MapComponent = ({ locations, onLocationSelect, loading, error, mapR
           zIndex: 2, 
           left: 16, 
           top: 12, 
-          padding: '8px', 
-          background: 'rgba(255,255,255,0.95)', 
+          padding: '12px 16px', 
+          background: '#1a0d3f', 
           borderRadius: 6, 
-          boxShadow: '0 2px 10px rgba(0,0,0,0.1)' 
+          boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          color: 'white'
         }}>
-          {segment === 'exchange' || segment === 'exchanges' 
-            ? 'Checking for latest exchanges…' 
-            : 'Checking for latest sublets…'
-          }
+          <div className="spinner-small-dark"></div>
+          <span>
+            {segment === 'exchange' || segment === 'exchanges' 
+              ? 'Checking for latest exchanges…' 
+              : 'Checking for latest sublets…'
+            }
+          </span>
         </div>
       )}
       

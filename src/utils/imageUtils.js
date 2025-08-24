@@ -78,17 +78,85 @@ export const isValidImageUrl = async (url) => {
 }
 
 /**
- * Instructions for users on how to embed images in Google Sheets
+ * Instructions for users on how to add images to Google Sheets
  */
 export const getImageEmbedInstructions = () => {
   return {
     title: "How to Add Photos to Your Listing",
-    steps: [
-      "1. In the Google Sheet, click on the Photo cell for your listing",
-      "2. Click Insert → Image → Image in cell",
-      "3. Choose your photo file",
-      "4. The image will be embedded directly in the cell",
-      "5. Save the sheet - the photo will automatically appear on the map!"
-    ]
+    methods: [
+      {
+        title: "Method 1: Slack (Easiest)",
+        steps: [
+          "1. Open Slack and send your photo to yourself in DMs",
+          "2. Click on the uploaded image",
+          "3. Click 'Open in browser' or right-click → 'Copy image address'", 
+          "4. Paste the direct URL in your Photo cell",
+          "5. Photo appears on the map instantly!"
+        ]
+      },
+      {
+        title: "Method 2: Google Drive",
+        steps: [
+          "1. Upload photo to Google Drive",
+          "2. Right-click → Share → 'Anyone with the link'",
+          "3. Copy URL and convert: change '/file/d/ID/view' to '/uc?id=ID'",
+          "4. Paste converted URL in Photo cell"
+        ]
+      },
+      {
+        title: "Method 3: Any Image Host", 
+        steps: [
+          "1. Upload to Imgur, Dropbox, or any image host",
+          "2. Get the direct image URL (ends in .jpg, .png, etc.)",
+          "3. Paste URL in Photo cell"
+        ]
+      }
+    ],
+    troubleshooting: [
+      "• Make sure URLs are publicly accessible (not private)",
+      "• Google Drive links need proper sharing permissions", 
+      "• Supported formats: JPG, PNG, GIF, WebP",
+      "• If images don't appear, refresh the page and check browser console"
+    ],
+    urlConverter: {
+      title: "Google Drive URL Converter",
+      instructions: [
+        "Convert Google Drive share links to direct image URLs:",
+        "From: https://drive.google.com/file/d/FILE_ID/view",
+        "To: https://drive.google.com/uc?id=FILE_ID"
+      ]
+    }
   }
+}
+
+/**
+ * Convert Google Drive share URL to direct image URL
+ * @param {string} shareUrl - Google Drive share URL
+ * @returns {string|null} Direct image URL or null if invalid
+ */
+export const convertGoogleDriveUrl = (shareUrl) => {
+  if (!shareUrl || typeof shareUrl !== 'string') return null;
+  
+  // Match Google Drive share URL pattern
+  const match = shareUrl.match(/\/file\/d\/([a-zA-Z0-9-_]+)/);
+  if (match) {
+    const fileId = match[1];
+    return `https://drive.google.com/uc?id=${fileId}`;
+  }
+  
+  return null;
+}
+
+/**
+ * Validate if URL is a direct image URL
+ * @param {string} url - URL to validate
+ * @returns {boolean} Whether URL appears to be a direct image
+ */
+export const isDirectImageUrl = (url) => {
+  if (!url || typeof url !== 'string') return false;
+  
+  const imageExtensions = /\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i;
+  const drivePattern = /drive\.google\.com\/uc\?id=/;
+  
+  return imageExtensions.test(url) || drivePattern.test(url);
 }

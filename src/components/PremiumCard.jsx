@@ -72,7 +72,7 @@ export const PremiumCard = ({ location, onClose, isClosing, segment, rowIndex = 
           />
         ) : null}
         <div className="premium-card-placeholder" style={{ display: imageUrl ? 'none' : 'block' }}>
-          {imageLoading ? 'Loading...' : imageError ? 'Error loading image' : 'No Image'}
+          {imageError ? 'Error loading image' : 'No Image'}
         </div>
         <div className="premium-card-image-overlay">
           <h3 className="premium-card-title-overlay">{location.City || ''}</h3>

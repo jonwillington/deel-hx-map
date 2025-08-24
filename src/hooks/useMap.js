@@ -45,11 +45,14 @@ export const useMap = (locations, onLocationSelect, loading) => {
         zoom: 2,
         interactive: true,
         dragPan: { deceleration: 0.98, maxSpeed: 800 },
-        scrollZoom: { speed: 0.3, smooth: true },
+        scrollZoom: { speed: 0.2, smooth: true, maxZoom: 18, minZoom: 1 },
         boxZoom: false,
         doubleClickZoom: false,
         keyboard: false,
-        attributionControl: false
+        attributionControl: false,
+        maxBounds: [[-180, -85], [180, 85]], // Prevent going beyond reasonable bounds
+        maxZoom: 18,
+        minZoom: 1
       })
 
       console.log('useMap:init instance created, waiting for load...')
@@ -65,6 +68,69 @@ export const useMap = (locations, onLocationSelect, loading) => {
       
       mapRef.current.on('error', (e) => {
         console.error('useMap:event error', e)
+      })
+      
+      // Add bounds reset on invalid coordinates
+      mapRef.current.on('moveend', () => {
+        try {
+          const center = mapRef.current.getCenter()
+          const zoom = mapRef.current.getZoom()
+          
+          // Check if we're in an invalid location
+          if (!isFinite(center.lng) || !isFinite(center.lat) || 
+              center.lat < -85 || center.lat > 85 || 
+              zoom < 1 || zoom > 18) {
+            console.warn('useMap: Invalid map state detected, resetting to safe location')
+            mapRef.current.easeTo({
+              center: [0, 20],
+              zoom: 2,
+              duration: 1000
+            })
+          }
+        } catch (error) {
+          console.error('useMap: Error checking map state:', error)
+        }
+      })
+
+      // Prevent extreme movements during drag/scroll
+      mapRef.current.on('movestart', () => {
+        try {
+          const center = mapRef.current.getCenter()
+          if (!isFinite(center.lng) || !isFinite(center.lat)) {
+            console.warn('useMap: Invalid coordinates at movestart, preventing movement')
+            mapRef.current.stop()
+            mapRef.current.easeTo({
+              center: [0, 20],
+              zoom: 2,
+              duration: 500
+            })
+          }
+        } catch (error) {
+          console.error('useMap: Error in movestart handler:', error)
+        }
+      })
+
+      // Additional safety check during movement
+      mapRef.current.on('move', () => {
+        try {
+          const center = mapRef.current.getCenter()
+          const zoom = mapRef.current.getZoom()
+          
+          // If we detect extreme coordinates during movement, stop and reset
+          if (!isFinite(center.lng) || !isFinite(center.lat) || 
+              center.lat < -90 || center.lat > 90 || 
+              center.lng < -180 || center.lng > 180) {
+            console.warn('useMap: Extreme coordinates detected during movement, stopping and resetting')
+            mapRef.current.stop()
+            mapRef.current.easeTo({
+              center: [0, 20],
+              zoom: 2,
+              duration: 500
+            })
+          }
+        } catch (error) {
+          console.error('useMap: Error in move handler:', error)
+        }
       })
 
       mapRef.current.on('movestart', () => {
@@ -88,6 +154,17 @@ export const useMap = (locations, onLocationSelect, loading) => {
             targetCenterLng = Number(options.center.lng)
             targetCenterLat = Number(options.center.lat)
           }
+        }
+        
+        // Clamp coordinates to safe bounds
+        targetCenterLng = Math.max(-180, Math.min(180, targetCenterLng))
+        targetCenterLat = Math.max(-85, Math.min(85, targetCenterLat))
+        
+        // Ensure coordinates are finite
+        if (!isFinite(targetCenterLng) || !isFinite(targetCenterLat)) {
+          console.warn('useMap: Non-finite coordinates detected, using safe defaults')
+          targetCenterLng = 0
+          targetCenterLat = 20
         }
         let duration
         if (options && typeof options.duration === 'number') {
@@ -233,26 +310,38 @@ export const useMap = (locations, onLocationSelect, loading) => {
     // Get marker coordinates
     const ll = marker.getLngLat()
     const currentCenter = mapRef.current.getCenter()
+    
+    // Validate coordinates
     if (!isFinite(ll.lng) || !isFinite(ll.lat) || !isFinite(currentCenter.lng) || !isFinite(currentCenter.lat)) {
       console.warn('useMap:select: invalid centers', { ll, currentCenter })
       return
     }
     
+    // Clamp coordinates to valid ranges
+    const validLng = Math.max(-180, Math.min(180, ll.lng))
+    const validLat = Math.max(-85, Math.min(85, ll.lat))
+    const validCurrentLng = Math.max(-180, Math.min(180, currentCenter.lng))
+    const validCurrentLat = Math.max(-85, Math.min(85, currentCenter.lat))
+    
+    if (validLng !== ll.lng || validLat !== ll.lat) {
+      console.warn('useMap:select: coordinates clamped', { original: ll, clamped: [validLng, validLat] })
+    }
+    
     // Calculate the shortest rotation to make the marker visible
-    let targetLng = ll.lng
-    const lngDiff = targetLng - currentCenter.lng
+    let targetLng = validLng
+    const lngDiff = targetLng - validCurrentLng
     if (Math.abs(lngDiff) > 180) {
       if (lngDiff > 0) {
-        targetLng = ll.lng - 360
+        targetLng = validLng - 360
       } else {
-        targetLng = ll.lng + 360
+        targetLng = validLng + 360
       }
     }
 
     // Calculate distance for duration scaling
     const distance = Math.sqrt(
-      Math.pow(targetLng - currentCenter.lng, 2) + 
-      Math.pow(ll.lat - currentCenter.lat, 2)
+      Math.pow(targetLng - validCurrentLng, 2) + 
+      Math.pow(validLat - validCurrentLat, 2)
     )
 
     // Faster, capped duration for selection animation
@@ -264,7 +353,7 @@ export const useMap = (locations, onLocationSelect, loading) => {
     // No marker style resets needed after movement
 
     mapRef.current.easeTo({
-      center: [Number(targetLng), Number(ll.lat)],
+      center: [Number(targetLng), Number(validLat)],
       zoom: 2,
       duration,
       easing: (t) => {

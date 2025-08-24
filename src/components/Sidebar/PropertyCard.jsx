@@ -43,20 +43,20 @@ export const PropertyCard = ({ row, itemIndex, isActive, loading, onClick, style
       onClick={() => onClick(itemIndex)}
       style={style}
     >
-      <div className="small-card-content">
-        {imageUrl && (
-          <div className="small-card-photo">
-            <img 
-              src={imageUrl} 
-              alt="Property" 
-              style={{ height: '100%', width: '100%', objectFit: 'cover' }}
-              onError={(e) => {
-                console.error('PropertyCard image failed to load:', e.target.src.substring(0, 100) + '...')
-                e.target.style.display = 'none'
-              }}
-            />
-          </div>
-        )}
+                <div className="small-card-content">
+            {imageUrl ? (
+              <div className="small-card-photo">
+                <img 
+                  src={imageUrl} 
+                  alt="Property" 
+                  style={{ height: '100%', width: '100%', objectFit: 'cover' }}
+                  onError={(e) => {
+                    console.error('PropertyCard image failed to load:', e.target.src.substring(0, 100) + '...')
+                    e.target.style.display = 'none'
+                  }}
+                />
+              </div>
+            ) : null}
         <div className="small-card-details">
           <div className="small-card-location" style={{ fontSize: '18px', fontWeight: '500', marginBottom: '2px', letterSpacing: '-0.3px', fontFamily: 'Bagoss Standard, sans-serif' }}>
             {row.City || ''} {getCountryFlag(row.Country)}

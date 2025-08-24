@@ -27,8 +27,22 @@ export const geocode = async (row) => {
     console.log('geocode: API response:', data)
     
     if (data.features && data.features.length > 0) {
-      console.log('geocode: Found coordinates:', data.features[0].center)
-      return data.features[0].center
+      const coords = data.features[0].center
+      console.log('geocode: Found coordinates:', coords)
+      
+      // Validate coordinates
+      if (Array.isArray(coords) && coords.length === 2) {
+        const [lng, lat] = coords
+        if (isFinite(lng) && isFinite(lat) && 
+            lng >= -180 && lng <= 180 && 
+            lat >= -85 && lat <= 85) {
+          return coords
+        } else {
+          console.warn('geocode: Invalid coordinates returned:', coords)
+        }
+      } else {
+        console.warn('geocode: Invalid coordinate format:', coords)
+      }
     } else {
       console.log('geocode: No features found in response')
     }

@@ -5,60 +5,88 @@
 const SHEET_ID = '14YSy-w-db4rqXa1nHyaPZCVp7Qcd3UcOBJOqfZXENdo'
 const API_KEY = import.meta.env.VITE_GOOGLE_SHEETS_API_KEY
 
+// Google Apps Script Web App URL for embedded images
+// TODO: Replace with your deployed Apps Script URL after setup
+const APPS_SCRIPT_URL = import.meta.env.VITE_APPS_SCRIPT_URL || null
+
 /**
- * Get embedded images from Google Sheets using the API
+ * Get embedded images from Google Sheets using Google Apps Script
  * @param {string} gid - Sheet GID (0 for first sheet, 432320278 for exchanges)
  * @returns {Promise<Object>} Mapping of row numbers to image URLs
  */
 export const getEmbeddedImages = async (gid = '0') => {
   try {
-    // If no API key is configured, return development fallback
-    if (!API_KEY) {
-      console.warn('Google Sheets API key not configured. Using development fallback.')
-      return {
-        // Row 2 (Jon Willington's Barcelona listing) - 1-based indexing
-        '2': 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=400&h=300&fit=crop&crop=center'
+    // Method 1: Try Google Apps Script (preferred for embedded images)
+    if (APPS_SCRIPT_URL) {
+      console.log('Fetching embedded images from Google Apps Script...')
+      const appsScriptResponse = await fetch(`${APPS_SCRIPT_URL}?gid=${gid}`)
+      
+      if (appsScriptResponse.ok) {
+        const appsScriptData = await appsScriptResponse.json()
+        console.log('Apps Script response:', appsScriptData)
+        
+        if (appsScriptData.success && appsScriptData.images) {
+          const imageCount = Object.keys(appsScriptData.images).length
+          console.log(`Successfully retrieved ${imageCount} embedded images from Apps Script`)
+          return appsScriptData.images
+        } else {
+          console.warn('Apps Script returned no images:', appsScriptData.error || 'Unknown error')
+        }
+      } else {
+        console.warn('Apps Script request failed:', appsScriptResponse.status, appsScriptResponse.statusText)
       }
     }
     
-    const sheetName = gid === '432320278' ? 'Sheet2' : 'Sheet1'
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}?ranges=${sheetName}&includeGridData=true&key=${API_KEY}`
-    
-    console.log('Fetching embedded images from Google Sheets API...')
-    const response = await fetch(url)
-    
-    if (!response.ok) {
-      throw new Error(`Google Sheets API error: ${response.status} ${response.statusText}`)
-    }
-    
-    const data = await response.json()
-    console.log('Google Sheets API response:', data)
-    
-    // Extract embedded images from the response
-    const images = {}
-    if (data.sheets && data.sheets[0] && data.sheets[0].data && data.sheets[0].data[0]) {
-      const sheetData = data.sheets[0].data[0]
+    // Method 2: Fallback to Google Sheets API v4 (limited - cannot access embedded images)
+    if (API_KEY) {
+      console.log('Falling back to Google Sheets API v4...')
+      const sheetName = gid === '432320278' ? 'Exchange' : 'Sublet'
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${sheetName}!L:L?key=${API_KEY}`
       
-      // Look for embedded images in the grid data
-      if (sheetData.rowData) {
-        sheetData.rowData.forEach((row, rowIndex) => {
-          if (row.values) {
-            row.values.forEach((cell, colIndex) => {
-              // Check if this cell contains an embedded image
-              if (cell.effectiveFormat && cell.effectiveFormat.backgroundColor) {
-                // This is a simplified check - in practice, you'd need to look for
-                // specific image-related properties in the cell data
-                console.log(`Found potential image in row ${rowIndex + 1}, column ${colIndex + 1}`)
+      const response = await fetch(url)
+      if (!response.ok) {
+        throw new Error(`Google Sheets API error: ${response.status} ${response.statusText}`)
+      }
+      
+      const data = await response.json()
+      console.log('Google Sheets API fallback response:', data)
+      
+      // Check for URLs in Photo column (column L)
+      const images = {}
+      if (data.values) {
+        data.values.forEach((row, index) => {
+          const rowNumber = index + 1 // Convert to 1-based indexing
+          const cellValue = row[0] // First (and only) column in the L:L range
+          
+          if (cellValue && typeof cellValue === 'string') {
+            // Check if it's a valid URL
+            if (cellValue.startsWith('http') || cellValue.startsWith('data:image/')) {
+              images[rowNumber.toString()] = cellValue
+              console.log(`Found image URL in row ${rowNumber}: ${cellValue.substring(0, 50)}...`)
+            }
+            // Check if it's an =IMAGE() formula
+            else if (cellValue.includes('=IMAGE(')) {
+              const urlMatch = cellValue.match(/=IMAGE\s*\(\s*"([^"]+)"\s*\)/i)
+              if (urlMatch) {
+                images[rowNumber.toString()] = urlMatch[1]
+                console.log(`Found IMAGE formula in row ${rowNumber}: ${urlMatch[1]}`)
               }
-            })
+            }
           }
         })
       }
+      
+      const imageCount = Object.keys(images).length
+      if (imageCount > 0) {
+        console.log(`Found ${imageCount} images via API fallback`)
+        return images
+      }
     }
     
-    // For now, return the development fallback
-    // TODO: Implement proper image extraction from API response
+    // Method 3: Development fallback
+    console.warn('No images found via any method. Using development fallback.')
     return {
+      // Row 2 (Jon Willington's Barcelona listing) - 1-based indexing
       '2': 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?w=400&h=300&fit=crop&crop=center'
     }
     
@@ -100,19 +128,55 @@ export const getImageForRow = async (rowNumber, location, gid = '0') => {
 }
 
 /**
- * Instructions for setting up Google Sheets API
+ * Instructions for setting up Google Apps Script for embedded images
  */
 export const getApiSetupInstructions = () => {
   return {
-    title: "Setting up Google Sheets API for Embedded Images",
-    steps: [
-      "1. Go to Google Cloud Console (https://console.cloud.google.com/)",
-      "2. Create a new project or select existing one",
-      "3. Enable Google Sheets API",
-      "4. Create API credentials (API Key or Service Account)",
-      "5. Add the API key to your environment variables",
-      "6. Update the sheetsApi.js file with your API key"
+    title: "Setting up Google Apps Script for Embedded Images",
+    sections: [
+      {
+        title: "Step 1: Create Google Apps Script",
+        steps: [
+          "1. Go to script.google.com",
+          "2. Click 'New project'",
+          "3. Replace the code with the content from google-apps-script.js",
+          "4. Save the project with a meaningful name (e.g., 'Deel HX Map Images')"
+        ]
+      },
+      {
+        title: "Step 2: Deploy as Web App",
+        steps: [
+          "1. Click 'Deploy' → 'New deployment'",
+          "2. Choose type: 'Web app'",
+          "3. Set 'Execute as': 'Me'",
+          "4. Set 'Who has access': 'Anyone'",
+          "5. Click 'Deploy' and authorize the app",
+          "6. Copy the Web App URL"
+        ]
+      },
+      {
+        title: "Step 3: Configure Environment",
+        steps: [
+          "1. Add VITE_APPS_SCRIPT_URL=your_web_app_url to .env",
+          "2. Restart your development server",
+          "3. Test the integration"
+        ]
+      }
     ],
-    note: "This will allow the app to fetch embedded images directly from Google Sheets cells."
+    troubleshooting: [
+      "• If images don't appear, check the Apps Script logs at script.google.com",
+      "• Ensure the sheet ID matches in both your app and the script",
+      "• Test the script functions directly in the Apps Script editor",
+      "• Make sure users add images via Insert → Image → Image in cell"
+    ],
+    userInstructions: {
+      title: "For Users: How to Add Photos",
+      steps: [
+        "1. Click on the Photo cell in your row",
+        "2. Go to Insert → Image → Image in cell",
+        "3. Upload or choose your photo",
+        "4. The image will appear in the map automatically!"
+      ]
+    }
   }
 }
