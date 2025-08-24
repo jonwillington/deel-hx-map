@@ -12,7 +12,7 @@ export const SegmentedControl = ({ selectedSegment, onSegmentChange }) => {
         className={`segment-button ${selectedSegment === 'sublets' ? 'active' : ''}`}
         onClick={() => onSegmentChange('sublets')}
       >
-        Sublets
+        Sublet
       </button>
       <button 
         className={`segment-button ${selectedSegment === 'exchange' ? 'active' : ''}`}

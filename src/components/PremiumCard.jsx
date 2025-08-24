@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { getCountryFlag, getListingType } from '../utils/locationUtils'
 import { formatReadableDate } from '../utils/dateUtils'
+import { getImageUrl } from '../utils/imageUtils'
 
 /**
  * Premium card component for displaying detailed property information
@@ -26,8 +27,9 @@ export const PremiumCard = ({ location, onClose, isClosing, segment }) => {
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = scrollableElement
       const isScrollable = scrollHeight > clientHeight
-      const isAtTop = scrollTop === 0
-      setShowScrollIndicator(isScrollable && !isAtTop)
+      
+      // Show indicator when there's content to scroll (regardless of scroll position)
+      setShowScrollIndicator(isScrollable)
     }
 
     // Ensure the element can receive scroll events
@@ -39,8 +41,15 @@ export const PremiumCard = ({ location, onClose, isClosing, segment }) => {
     // Check initial state
     handleScroll()
 
+    // Also check on window resize to handle dynamic content changes
+    const handleResize = () => {
+      setTimeout(handleScroll, 100) // Small delay to ensure DOM updates
+    }
+    window.addEventListener('resize', handleResize)
+
     return () => {
       scrollableElement.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', handleResize)
     }
   }, [location])
 
@@ -48,11 +57,20 @@ export const PremiumCard = ({ location, onClose, isClosing, segment }) => {
     <div className={`premium-card ${isClosing ? 'premium-card-closing' : ''}`}>
       {/* Full-width image at top */}
       <div className="premium-card-image">
-        {location.Photo ? (
-          <img src={location.Photo} alt="Property" />
-        ) : (
-          <div className="premium-card-placeholder">No Image</div>
-        )}
+        {getImageUrl(location) ? (
+          <img 
+            src={getImageUrl(location)} 
+            alt="Property" 
+            onError={(e) => {
+              console.error('Image failed to load:', e.target.src.substring(0, 100) + '...')
+              e.target.style.display = 'none'
+              e.target.nextSibling.style.display = 'block'
+            }}
+          />
+        ) : null}
+        <div className="premium-card-placeholder" style={{ display: getImageUrl(location) ? 'none' : 'block' }}>
+          No Image
+        </div>
         <div className="premium-card-image-overlay">
           <h3 className="premium-card-title-overlay">{location.City || ''}</h3>
           <p className="premium-card-country-overlay">{getCountryFlag(location.Country)} {location.Country || ''}</p>
@@ -81,7 +99,7 @@ export const PremiumCard = ({ location, onClose, isClosing, segment }) => {
             <div className="premium-card-cell-label">Type</div>
             <div className="premium-card-cell-value">
               <span className="premium-card-tag">
-                {segment === 'exchange' || segment === 'exchanges' ? 'exchange' : 'sublet'}
+                {segment === 'exchange' || segment === 'exchanges' ? 'Exchange' : 'Sublet'}
               </span>
             </div>
           </div>

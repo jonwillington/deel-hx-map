@@ -1,4 +1,5 @@
 import { getCountryFlag } from '../../utils/locationUtils'
+import { getImageUrl } from '../../utils/imageUtils'
 
 /**
  * Property card component for displaying individual properties in the sidebar
@@ -41,9 +42,17 @@ export const PropertyCard = ({ row, itemIndex, isActive, loading, onClick, style
       style={style}
     >
       <div className="small-card-content">
-        {row.Photo && (
+        {getImageUrl(row) && (
           <div className="small-card-photo">
-            <img src={row.Photo} alt="Property" style={{ height: '100%', width: '100%', objectFit: 'cover' }} />
+            <img 
+              src={getImageUrl(row)} 
+              alt="Property" 
+              style={{ height: '100%', width: '100%', objectFit: 'cover' }}
+              onError={(e) => {
+                console.error('PropertyCard image failed to load:', e.target.src.substring(0, 100) + '...')
+                e.target.style.display = 'none'
+              }}
+            />
           </div>
         )}
         <div className="small-card-details">
