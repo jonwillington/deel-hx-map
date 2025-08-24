@@ -53,9 +53,6 @@ export const PropertyCard = ({ row, itemIndex, isActive, loading, onClick, style
           <div className="small-card-dates" style={{ fontSize: '14px', color: '#6d6d70', marginBottom: '6px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
             {getDisplayText()}
           </div>
-          <div className="small-card-name" style={{ fontSize: '14px', color: '#86868b', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
-            {row.Name}
-          </div>
         </div>
       </div>
     </button>

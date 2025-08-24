@@ -153,6 +153,18 @@ export const useMap = (locations, onLocationSelect, loading) => {
           .setLngLat(coords)
           .addTo(mapRef.current)
 
+        // Add click event to marker
+        const markerElement = marker.getElement()
+        markerElement.style.cursor = 'pointer'
+        markerElement.addEventListener('click', () => {
+          // Find the index of this location in the filtered locations array
+          const locationIndex = locations.findIndex(loc => loc === row)
+          if (locationIndex !== -1) {
+            console.log('useMap: Marker clicked for:', row.City, 'at index:', locationIndex)
+            onLocationSelect(locationIndex)
+          }
+        })
+
         markersRef.current.push(marker)
         // Map the actual row object identity to its marker
         locationToMarkerMapRef.current.set(row, marker)

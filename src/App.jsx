@@ -11,6 +11,7 @@ import './App.css'
 function App() {
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const [showPremiumCard, setShowPremiumCard] = useState(false)
+  const [isClosingPremiumCard, setIsClosingPremiumCard] = useState(false)
   const [currentLocation, setCurrentLocation] = useState(null)
   const [selectedSegment, setSelectedSegment] = useState('sublets')
 
@@ -20,6 +21,12 @@ function App() {
   
   // Handle property selection
   function handleSelect(index) {
+    // If clicking the already selected item, close the drawer
+    if (selectedIndex === index && showPremiumCard) {
+      handlePremiumCardClose()
+      return
+    }
+
     setSelectedIndex(index)
     
     if (index >= 0 && index < filteredLocations.length) {
@@ -46,11 +53,15 @@ function App() {
     setCurrentLocation(null)
   }
 
-  // Handle premium card close
+  // Handle premium card close with animation
   const handlePremiumCardClose = () => {
-    setShowPremiumCard(false)
+    setIsClosingPremiumCard(true)
+    setTimeout(() => {
+      setShowPremiumCard(false)
+      setIsClosingPremiumCard(false)
       setSelectedIndex(-1)
       setCurrentLocation(null)
+    }, 300) // Match the animation duration
   }
 
   return (
@@ -73,10 +84,11 @@ function App() {
         mapRef={mapContainerRef}
       />
       
-      {showPremiumCard && (
+      {(showPremiumCard || isClosingPremiumCard) && (
         <PremiumCard 
           location={currentLocation} 
           onClose={handlePremiumCardClose}
+          isClosing={isClosingPremiumCard}
         />
       )}
     </div>
