@@ -36,6 +36,7 @@ export const Sidebar = ({
             filteredLocations={filteredLocations}
             selectedIndex={selectedIndex}
             loading={loading}
+            selectedSegment={selectedSegment}
             onSelect={onSelect}
           />
         )}

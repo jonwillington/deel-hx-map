@@ -15,8 +15,8 @@ function App() {
   const [currentLocation, setCurrentLocation] = useState(null)
   const [selectedSegment, setSelectedSegment] = useState('sublets')
 
-  // Custom hooks
-  const { locations, loading, error, showSkeletons } = useLocations()
+  // Custom hooks - pass selectedSegment to dynamically fetch correct sheet
+  const { locations, loading, error, showSkeletons } = useLocations(selectedSegment)
   const filteredLocations = useFilteredLocations(locations, selectedSegment)
   
   // Handle property selection
