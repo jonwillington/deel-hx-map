@@ -33,6 +33,7 @@ export const PropertyList = ({ filteredLocations, selectedIndex, loading, select
           loading={loading}
           style={!loading ? { animationDelay: `${delay}ms` } : undefined}
           onClick={onSelect}
+          segment={selectedSegment}
         />
       )
       staggerIndex += 1
@@ -77,6 +78,7 @@ export const PropertyList = ({ filteredLocations, selectedIndex, loading, select
             loading={loading}
             style={!loading ? { animationDelay: `${delay}ms` } : undefined}
             onClick={onSelect}
+            segment={selectedSegment}
           />
         )
         staggerIndex += 1

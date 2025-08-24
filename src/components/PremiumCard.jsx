@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { getCountryFlag, getListingType } from '../utils/locationUtils'
 import { formatReadableDate } from '../utils/dateUtils'
-import { getImageUrl } from '../utils/imageUtils'
+import { useImageUrl } from '../hooks/useImageUrl'
 
 /**
  * Premium card component for displaying detailed property information
@@ -12,10 +12,13 @@ import { getImageUrl } from '../utils/imageUtils'
  * @param {string} props.segment - Current segment ('sublets' or 'exchange')
  * @returns {JSX.Element|null}
  */
-export const PremiumCard = ({ location, onClose, isClosing, segment }) => {
+export const PremiumCard = ({ location, onClose, isClosing, segment, rowIndex = null }) => {
   const [showModal, setShowModal] = useState(false)
   const [showScrollIndicator, setShowScrollIndicator] = useState(false)
   const scrollableRef = useRef(null)
+  
+  // Load image URL asynchronously
+  const { imageUrl, loading: imageLoading, error: imageError } = useImageUrl(location, rowIndex, segment)
   
   if (!location) return null
 
@@ -57,9 +60,9 @@ export const PremiumCard = ({ location, onClose, isClosing, segment }) => {
     <div className={`premium-card ${isClosing ? 'premium-card-closing' : ''}`}>
       {/* Full-width image at top */}
       <div className="premium-card-image">
-        {getImageUrl(location) ? (
+        {imageUrl ? (
           <img 
-            src={getImageUrl(location)} 
+            src={imageUrl} 
             alt="Property" 
             onError={(e) => {
               console.error('Image failed to load:', e.target.src.substring(0, 100) + '...')
@@ -68,8 +71,8 @@ export const PremiumCard = ({ location, onClose, isClosing, segment }) => {
             }}
           />
         ) : null}
-        <div className="premium-card-placeholder" style={{ display: getImageUrl(location) ? 'none' : 'block' }}>
-          No Image
+        <div className="premium-card-placeholder" style={{ display: imageUrl ? 'none' : 'block' }}>
+          {imageLoading ? 'Loading...' : imageError ? 'Error loading image' : 'No Image'}
         </div>
         <div className="premium-card-image-overlay">
           <h3 className="premium-card-title-overlay">{location.City || ''}</h3>

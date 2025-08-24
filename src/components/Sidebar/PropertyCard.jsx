@@ -1,5 +1,5 @@
 import { getCountryFlag } from '../../utils/locationUtils'
-import { getImageUrl } from '../../utils/imageUtils'
+import { useImageUrl } from '../../hooks/useImageUrl'
 
 /**
  * Property card component for displaying individual properties in the sidebar
@@ -11,7 +11,9 @@ import { getImageUrl } from '../../utils/imageUtils'
  * @param {Function} props.onClick - Function to call when card is clicked
  * @returns {JSX.Element}
  */
-export const PropertyCard = ({ row, itemIndex, isActive, loading, onClick, style }) => {
+export const PropertyCard = ({ row, itemIndex, isActive, loading, onClick, style, segment = 'sublets' }) => {
+  // Load image URL asynchronously
+  const { imageUrl, loading: imageLoading } = useImageUrl(row, itemIndex, segment)
   const getDisplayText = () => {
     if (row.Status && row.Status.toUpperCase() === 'ASK') {
       return 'Contact for availability'
@@ -42,10 +44,10 @@ export const PropertyCard = ({ row, itemIndex, isActive, loading, onClick, style
       style={style}
     >
       <div className="small-card-content">
-        {getImageUrl(row) && (
+        {imageUrl && (
           <div className="small-card-photo">
             <img 
-              src={getImageUrl(row)} 
+              src={imageUrl} 
               alt="Property" 
               style={{ height: '100%', width: '100%', objectFit: 'cover' }}
               onError={(e) => {

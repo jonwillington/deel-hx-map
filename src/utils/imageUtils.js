@@ -2,12 +2,16 @@
  * Utility functions for handling embedded images in Google Sheets
  */
 
+import { getImageForRow } from './sheetsApi'
+
 /**
  * Get image URL from location data
  * @param {Object} location - Location data object
- * @returns {string|null} Image URL or null if no image
+ * @param {number} rowIndex - The index of the location in the filtered array
+ * @param {string} segment - The current segment ('sublets' or 'exchanges')
+ * @returns {Promise<string|null>} Image URL or null if no image
  */
-export const getImageUrl = (location) => {
+export const getImageUrl = async (location, rowIndex = null, segment = 'sublets') => {
   // Check if there's a direct Photo URL (existing functionality)
   if (location.Photo && location.Photo.startsWith('http')) {
     return location.Photo
@@ -47,9 +51,11 @@ export const getImageUrl = (location) => {
     }
   }
   
-  // TEMPORARY: Add placeholder for Barcelona listing (Jon Willington)
-  if (location?.Name === 'Jon Willington' && location?.City === 'Barcelona') {
-    return 'https://via.placeholder.com/400x300/4A90E2/FFFFFF?text=Barcelona+Property'
+  // Try to get embedded image from Google Sheets API
+  if (rowIndex !== null) {
+    const gid = (segment === 'exchanges' || segment === 'exchange') ? '432320278' : '0'
+    const rowNumber = rowIndex + 2 // +2 because row 1 is header, and we want 1-based indexing
+    return await getImageForRow(rowNumber, location, gid)
   }
   
   return null

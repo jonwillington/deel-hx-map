@@ -102,6 +102,7 @@ function App() {
             onClose={handlePremiumCardClose}
             isClosing={isClosingPremiumCard}
             segment={selectedSegment}
+            rowIndex={selectedIndex}
           />
         )}
       </div>
