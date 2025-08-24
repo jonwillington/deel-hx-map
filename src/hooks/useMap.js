@@ -124,13 +124,12 @@ export const useMap = (locations, onLocationSelect, loading) => {
   // Add markers when locations change and loading is complete
   useEffect(() => {
     console.log('useMap: Locations changed, locations count:', locations.length, 'loading:', loading)
+    console.log('useMap: First few locations:', locations.slice(0, 3).map(loc => ({ City: loc.City, Country: loc.Country })))
+    
     if (!mapRef.current || !locations.length || loading) {
       console.log('useMap: No map ref, no locations, or still loading - skipping markers')
       return
     }
-
-    // Add delay to let the list animation complete first
-    const markerDelay = setTimeout(() => {
 
     const addMarkers = async () => {
       console.log('useMap: Clearing existing markers, count:', markersRef.current.length)
@@ -183,9 +182,6 @@ export const useMap = (locations, onLocationSelect, loading) => {
 
     console.log('useMap: Starting to add markers...')
     addMarkers()
-    }, 3000) // Wait 3s for list animation to complete
-
-    return () => clearTimeout(markerDelay)
   }, [locations, loading])
 
   // Handle location selection - just for map animation

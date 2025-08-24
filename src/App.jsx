@@ -65,39 +65,43 @@ function App() {
   }
 
   return (
-    <div style={{ height: '100vh', width: '100vw', position: 'relative' }}>
+    <>
       {/* Mobile message for screens < 600px */}
       <div className="mobile-message">
         <h2>Currently only supported on Desktop!</h2>
         <p>Please visit this site on a desktop or laptop computer for the best experience.</p>
       </div>
 
-      <Sidebar 
-        filteredLocations={filteredLocations}
-        selectedIndex={selectedIndex}
-        loading={loading}
-        showSkeletons={showSkeletons}
-        selectedSegment={selectedSegment}
-        onSelect={handleSelect}
-        onSegmentChange={handleSegmentChange}
-      />
-
-      <MapComponent 
-        locations={filteredLocations}
-        onLocationSelect={handleSelect}
-        loading={loading}
-        error={error}
-        mapRef={mapContainerRef}
-      />
-      
-      {(showPremiumCard || isClosingPremiumCard) && (
-        <PremiumCard 
-          location={currentLocation} 
-          onClose={handlePremiumCardClose}
-          isClosing={isClosingPremiumCard}
+      <div style={{ height: '100vh', width: '100vw', position: 'relative' }}>
+        <Sidebar 
+          filteredLocations={filteredLocations}
+          selectedIndex={selectedIndex}
+          loading={loading}
+          showSkeletons={showSkeletons}
+          selectedSegment={selectedSegment}
+          onSelect={handleSelect}
+          onSegmentChange={handleSegmentChange}
         />
-      )}
-    </div>
+
+        <MapComponent 
+          locations={filteredLocations}
+          onLocationSelect={handleSelect}
+          loading={loading}
+          error={error}
+          mapRef={mapContainerRef}
+          segment={selectedSegment}
+        />
+        
+        {(showPremiumCard || isClosingPremiumCard) && (
+          <PremiumCard 
+            location={currentLocation} 
+            onClose={handlePremiumCardClose}
+            isClosing={isClosingPremiumCard}
+            segment={selectedSegment}
+          />
+        )}
+      </div>
+    </>
   )
 }
 

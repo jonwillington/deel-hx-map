@@ -16,7 +16,7 @@ export const useLocations = (segment = 'sublets') => {
     const baseSheetId = '14YSy-w-db4rqXa1nHyaPZCVp7Qcd3UcOBJOqfZXENdo'
     
     // Generate sheet-specific URLs with correct GIDs
-    if (segment === 'exchanges') {
+    if (segment === 'exchanges' || segment === 'exchange') {
       // Exchanges sheet GID: 432320278
       const exchangesUrl = `https://docs.google.com/spreadsheets/d/${baseSheetId}/export?format=csv&gid=432320278`
       console.log('useLocations: Generated Exchanges URL:', exchangesUrl)
@@ -38,7 +38,7 @@ export const useLocations = (segment = 'sublets') => {
     
     console.log(`useLocations: Fetching data for segment: ${segment}`)
     console.log(`useLocations: Using URL: ${csvUrl}`)
-    console.log(`useLocations: Expected GID for ${segment}:`, segment === 'exchanges' ? '432320278' : '0')
+    console.log(`useLocations: Expected GID for ${segment}:`, (segment === 'exchanges' || segment === 'exchange') ? '432320278' : '0')
     
     if (!csvUrl) {
       setError('CSV URL not configured')

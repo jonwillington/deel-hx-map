@@ -1,6 +1,6 @@
-# Deel Housing Exchange Map
+# dhxc Housing Exchange Map
 
-A beautiful interactive map application for Deel's housing exchange program, built with React and Mapbox.
+A beautiful interactive map application for dhxc's housing exchange program, built with React and Mapbox.
 
 ## Features
 
@@ -12,7 +12,7 @@ A beautiful interactive map application for Deel's housing exchange program, bui
 
 ## Live Site
 
-Visit: [https://jonwillington.github.io/deel-hx-map/](https://jonwillington.github.io/deel-hx-map/)
+Visit: [https://jonwillington.github.io/dhxc-hx-map/](https://jonwillington.github.io/dhxc-hx-map/)
 
 ## Development
 

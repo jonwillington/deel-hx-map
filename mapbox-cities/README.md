@@ -1,4 +1,4 @@
-# Deel HX Map
+# dhxc HX Map
 
 A premium property listing map application built with React, Mapbox GL JS, and Vite.
 
@@ -40,7 +40,7 @@ A premium property listing map application built with React, Mapbox GL JS, and V
 This project is configured for automatic deployment to GitHub Pages:
 
 1. The GitHub Actions workflow (`.github/workflows/deploy.yml`) will automatically build and deploy the app when you push to the `main` branch
-2. Your site will be available at: `https://jonwillington.github.io/deel-hx-map/`
+2. Your site will be available at: `https://jonwillington.github.io/dhxc-hx-map/`
 
 ## Technologies Used
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { getCountryFlag, getListingType } from '../utils/locationUtils'
 import { formatReadableDate } from '../utils/dateUtils'
 
@@ -7,12 +7,42 @@ import { formatReadableDate } from '../utils/dateUtils'
  * @param {Object} props
  * @param {Object} props.location - Property location data
  * @param {Function} props.onClose - Function to close the card
+ * @param {boolean} props.isClosing - Whether the card is closing
+ * @param {string} props.segment - Current segment ('sublets' or 'exchange')
  * @returns {JSX.Element|null}
  */
-export const PremiumCard = ({ location, onClose, isClosing }) => {
+export const PremiumCard = ({ location, onClose, isClosing, segment }) => {
   const [showModal, setShowModal] = useState(false)
+  const [showScrollIndicator, setShowScrollIndicator] = useState(false)
+  const scrollableRef = useRef(null)
   
   if (!location) return null
+
+  // Handle scroll indicator and ensure trackpad scrolling works
+  useEffect(() => {
+    const scrollableElement = scrollableRef.current
+    if (!scrollableElement) return
+
+    const handleScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = scrollableElement
+      const isScrollable = scrollHeight > clientHeight
+      const isAtTop = scrollTop === 0
+      setShowScrollIndicator(isScrollable && !isAtTop)
+    }
+
+    // Ensure the element can receive scroll events
+    scrollableElement.style.webkitOverflowScrolling = 'touch'
+    scrollableElement.tabIndex = 0
+    
+    scrollableElement.addEventListener('scroll', handleScroll)
+    
+    // Check initial state
+    handleScroll()
+
+    return () => {
+      scrollableElement.removeEventListener('scroll', handleScroll)
+    }
+  }, [location])
 
   return (
     <div className={`premium-card ${isClosing ? 'premium-card-closing' : ''}`}>
@@ -45,51 +75,61 @@ export const PremiumCard = ({ location, onClose, isClosing }) => {
       </div>
 
       {/* Scrollable cells section */}
-      <div className="premium-card-scrollable">
+      <div className="premium-card-scrollable" ref={scrollableRef}>
         <div className="premium-card-cells">
           <div className="premium-card-cell">
             <div className="premium-card-cell-label">Type</div>
             <div className="premium-card-cell-value">
-              {getListingType(location) ? (
-                <span className="premium-card-tag">{getListingType(location)}</span>
-              ) : (
-                'Not specified'
-              )}
+              <span className="premium-card-tag">
+                {segment === 'exchange' || segment === 'exchanges' ? 'exchange' : 'sublet'}
+              </span>
             </div>
           </div>
           
-          <div className="premium-card-cell">
-            <div className="premium-card-cell-label">Neighbourhood</div>
-            <div className="premium-card-cell-value">{location.Neighbourhood || 'Not specified'}</div>
-          </div>
+          {location.Neighbourhood && (
+            <div className="premium-card-cell">
+              <div className="premium-card-cell-label">Neighbourhood</div>
+              <div className="premium-card-cell-value">{location.Neighbourhood}</div>
+            </div>
+          )}
           
                           <div className="premium-card-cell">
-                  <div className="premium-card-cell-label">Available from</div>
+                  <div className="premium-card-cell-label">
+                    {segment === 'exchange' || segment === 'exchanges' ? 'Interested in' : 'Available from'}
+                  </div>
             <div className="premium-card-cell-value">
-              {location.Status && location.Status.toUpperCase() === 'ASK' ? 
-                'Contact for availability' :
-                (() => {
-                  if (!location.Start) return 'Not specified'
-                  const formattedDate = formatReadableDate(location.Start)
-                  return formattedDate
-                })()
+              {(segment === 'exchange' || segment === 'exchanges') ? 
+                (location['Destinations interested in swapping'] || 'Not specified') :
+                (location.Status && location.Status.toUpperCase() === 'ASK' ? 
+                  'Contact for availability' :
+                  (() => {
+                    if (!location.Start) return 'Not specified'
+                    const formattedDate = formatReadableDate(location.Start)
+                    return formattedDate
+                  })()
+                )
               }
             </div>
           </div>
 
           <div className="premium-card-cell">
-            <div className="premium-card-cell-label">Duration</div>
+            <div className="premium-card-cell-label">
+              {segment === 'exchange' || segment === 'exchanges' ? 'Target time' : 'Duration'}
+            </div>
             <div className="premium-card-cell-value">
-              {(() => {
-                const duration = location['Duration '] || location.Duration || location.duration || ''
-                return (duration && typeof duration === 'string' && duration.trim()) 
-                  ? duration.trim() 
-                  : 'Not specified'
-              })()}
+              {(segment === 'exchange' || segment === 'exchanges') ? 
+                (location['Target time'] || 'Not specified') :
+                (() => {
+                  const duration = location['Duration '] || location.Duration || location.duration || ''
+                  return (duration && typeof duration === 'string' && duration.trim()) 
+                    ? duration.trim() 
+                    : 'Not specified'
+                })()
+              }
             </div>
           </div>
 
-                          {location['Dates free start 2'] && (
+                          {(segment !== 'exchange' && segment !== 'exchanges') && location['Dates free start 2'] && (
                   <div className="premium-card-cell">
                     <div className="premium-card-cell-label">Also available from</div>
               <div className="premium-card-cell-value">{formatReadableDate(location['Dates free start 2'])}</div>
@@ -112,19 +152,24 @@ export const PremiumCard = ({ location, onClose, isClosing }) => {
           </div>
 
           <div className="premium-card-cell">
-            <div className="premium-card-cell-label">Pets</div>
+            <div className="premium-card-cell-label">Pet friendly?</div>
             <div className="premium-card-cell-value">
               {location.Pets ? 
                 <span className="premium-card-toggle premium-card-toggle-yes">Yes</span> : 
-                <span className="premium-card-toggle premium-card-toggle-no">No</span>
+                <span className="premium-card-toggle premium-card-toggle-no">Not currently</span>
               }
             </div>
           </div>
           
 
         </div>
-        
-        {/* Interest Button */}
+      </div>
+      
+      {/* Scroll indicator */}
+      <div className={`premium-card-scroll-indicator ${showScrollIndicator ? 'show' : ''}`}></div>
+      
+      {/* Interest Button - Fixed at bottom */}
+      <div className="premium-card-button-container">
         <button 
           className="premium-card-interest-button"
           onClick={() => setShowModal(true)}

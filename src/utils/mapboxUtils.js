@@ -6,7 +6,8 @@
 export const geocode = async (row) => {
   const city = row.City || row.city || ''
   const country = row.Country || row.country || ''
-  const query = [city, country].filter(Boolean).join(', ')
+  // Use city only if country is not available
+  const query = country ? [city, country].filter(Boolean).join(', ') : city
   
   console.log('geocode: Query:', query)
   
