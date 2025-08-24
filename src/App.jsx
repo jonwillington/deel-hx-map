@@ -66,6 +66,12 @@ function App() {
 
   return (
     <div style={{ height: '100vh', width: '100vw', position: 'relative' }}>
+      {/* Mobile message for screens < 600px */}
+      <div className="mobile-message">
+        <h2>Currently only supported on Desktop!</h2>
+        <p>Please visit this site on a desktop or laptop computer for the best experience.</p>
+      </div>
+
       <Sidebar 
         filteredLocations={filteredLocations}
         selectedIndex={selectedIndex}
