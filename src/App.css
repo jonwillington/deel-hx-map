@@ -1,9 +1,9 @@
 /* Bagoss Standard Font Family */
 @font-face {
   font-family: 'Bagoss Standard';
-  src: url('./fonts/BagossStandardTRIAL-Thin.woff2') format('woff2'),
-       url('./fonts/BagossStandardTRIAL-Thin.woff') format('woff'),
-       url('./fonts/BagossStandardTRIAL-Thin.ttf') format('truetype');
+  src: url('/fonts/BagossStandardTRIAL-Thin.woff2') format('woff2'),
+       url('/fonts/BagossStandardTRIAL-Thin.woff') format('woff'),
+       url('/fonts/BagossStandardTRIAL-Thin.ttf') format('truetype');
   font-weight: 100;
   font-style: normal;
   font-display: swap;
@@ -11,9 +11,9 @@
 
 @font-face {
   font-family: 'Bagoss Standard';
-  src: url('./fonts/BagossStandardTRIAL-ThinItalic.woff2') format('woff2'),
-       url('./fonts/BagossStandardTRIAL-ThinItalic.woff') format('woff'),
-       url('./fonts/BagossStandardTRIAL-ThinItalic.ttf') format('truetype');
+  src: url('/fonts/BagossStandardTRIAL-ThinItalic.woff2') format('woff2'),
+       url('/fonts/BagossStandardTRIAL-ThinItalic.woff') format('woff'),
+       url('/fonts/BagossStandardTRIAL-ThinItalic.ttf') format('truetype');
   font-weight: 100;
   font-style: italic;
   font-display: swap;
@@ -21,9 +21,9 @@
 
 @font-face {
   font-family: 'Bagoss Standard';
-  src: url('./fonts/BagossStandardTRIAL-Light.woff2') format('woff2'),
-       url('./fonts/BagossStandardTRIAL-Light.woff') format('woff'),
-       url('./fonts/BagossStandardTRIAL-Light.ttf') format('truetype');
+  src: url('/fonts/BagossStandardTRIAL-Light.woff2') format('woff2'),
+       url('/fonts/BagossStandardTRIAL-Light.woff') format('woff'),
+       url('/fonts/BagossStandardTRIAL-Light.ttf') format('truetype');
   font-weight: 300;
   font-style: normal;
   font-display: swap;
@@ -31,9 +31,9 @@
 
 @font-face {
   font-family: 'Bagoss Standard';
-  src: url('./fonts/BagossStandardTRIAL-LightItalic.woff2') format('woff2'),
-       url('./fonts/BagossStandardTRIAL-LightItalic.woff') format('woff'),
-       url('./fonts/BagossStandardTRIAL-LightItalic.ttf') format('truetype');
+  src: url('/fonts/BagossStandardTRIAL-LightItalic.woff2') format('woff2'),
+       url('/fonts/BagossStandardTRIAL-LightItalic.woff') format('woff'),
+       url('/fonts/BagossStandardTRIAL-LightItalic.ttf') format('truetype');
   font-weight: 300;
   font-style: italic;
   font-display: swap;
@@ -41,9 +41,9 @@
 
 @font-face {
   font-family: 'Bagoss Standard';
-  src: url('./fonts/BagossStandardTRIAL-Regular.woff2') format('woff2'),
-       url('./fonts/BagossStandardTRIAL-Regular.woff') format('woff'),
-       url('./fonts/BagossStandardTRIAL-Regular.ttf') format('truetype');
+  src: url('/fonts/BagossStandardTRIAL-Regular.woff2') format('woff2'),
+       url('/fonts/BagossStandardTRIAL-Regular.woff') format('woff'),
+       url('/fonts/BagossStandardTRIAL-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -51,9 +51,9 @@
 
 @font-face {
   font-family: 'Bagoss Standard';
-  src: url('./fonts/BagossStandardTRIAL-RegularItalic.woff2') format('woff2'),
-       url('./fonts/BagossStandardTRIAL-RegularItalic.woff') format('woff'),
-       url('./fonts/BagossStandardTRIAL-RegularItalic.ttf') format('truetype');
+  src: url('/fonts/BagossStandardTRIAL-RegularItalic.woff2') format('woff2'),
+       url('/fonts/BagossStandardTRIAL-RegularItalic.woff') format('woff'),
+       url('/fonts/BagossStandardTRIAL-RegularItalic.ttf') format('truetype');
   font-weight: 400;
   font-style: italic;
   font-display: swap;
@@ -61,9 +61,9 @@
 
 @font-face {
   font-family: 'Bagoss Standard';
-  src: url('./fonts/BagossStandardTRIAL-Medium.woff2') format('woff2'),
-       url('./fonts/BagossStandardTRIAL-Medium.woff') format('woff'),
-       url('./fonts/BagossStandardTRIAL-Medium.ttf') format('truetype');
+  src: url('/fonts/BagossStandardTRIAL-Medium.woff2') format('woff2'),
+       url('/fonts/BagossStandardTRIAL-Medium.woff') format('woff'),
+       url('/fonts/BagossStandardTRIAL-Medium.ttf') format('truetype');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -71,9 +71,9 @@
 
 @font-face {
   font-family: 'Bagoss Standard';
-  src: url('./fonts/BagossStandardTRIAL-MediumItalic.woff2') format('woff2'),
-       url('./fonts/BagossStandardTRIAL-MediumItalic.woff') format('woff'),
-       url('./fonts/BagossStandardTRIAL-MediumItalic.ttf') format('truetype');
+  src: url('/fonts/BagossStandardTRIAL-MediumItalic.woff2') format('woff2'),
+       url('/fonts/BagossStandardTRIAL-MediumItalic.woff') format('woff'),
+       url('/fonts/BagossStandardTRIAL-MediumItalic.ttf') format('truetype');
   font-weight: 500;
   font-style: italic;
   font-display: swap;
@@ -81,9 +81,9 @@
 
 @font-face {
   font-family: 'Bagoss Standard';
-  src: url('./fonts/BagossStandardTRIAL-SemiBold.woff2') format('woff2'),
-       url('./fonts/BagossStandardTRIAL-SemiBold.woff') format('woff'),
-       url('./fonts/BagossStandardTRIAL-SemiBold.ttf') format('truetype');
+  src: url('/fonts/BagossStandardTRIAL-SemiBold.woff2') format('woff2'),
+       url('/fonts/BagossStandardTRIAL-SemiBold.woff') format('woff'),
+       url('/fonts/BagossStandardTRIAL-SemiBold.ttf') format('truetype');
   font-weight: 600;
   font-style: normal;
   font-display: swap;
@@ -91,9 +91,9 @@
 
 @font-face {
   font-family: 'Bagoss Standard';
-  src: url('./fonts/BagossStandardTRIAL-SemiBoldItalic.woff2') format('woff2'),
-       url('./fonts/BagossStandardTRIAL-SemiBoldItalic.woff') format('woff'),
-       url('./fonts/BagossStandardTRIAL-SemiBoldItalic.ttf') format('truetype');
+  src: url('/fonts/BagossStandardTRIAL-SemiBoldItalic.woff2') format('woff2'),
+       url('/fonts/BagossStandardTRIAL-SemiBoldItalic.woff') format('woff'),
+       url('/fonts/BagossStandardTRIAL-SemiBoldItalic.ttf') format('truetype');
   font-weight: 600;
   font-style: italic;
   font-display: swap;
@@ -101,9 +101,9 @@
 
 @font-face {
   font-family: 'Bagoss Standard';
-  src: url('./fonts/BagossStandardTRIAL-Bold.woff2') format('woff2'),
-       url('./fonts/BagossStandardTRIAL-Bold.woff') format('woff'),
-       url('./fonts/BagossStandardTRIAL-Bold.ttf') format('truetype');
+  src: url('/fonts/BagossStandardTRIAL-Bold.woff2') format('woff2'),
+       url('/fonts/BagossStandardTRIAL-Bold.woff') format('woff'),
+       url('/fonts/BagossStandardTRIAL-Bold.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -111,9 +111,9 @@
 
 @font-face {
   font-family: 'Bagoss Standard';
-  src: url('./fonts/BagossStandardTRIAL-BoldItalic.woff2') format('woff2'),
-       url('./fonts/BagossStandardTRIAL-BoldItalic.woff') format('woff'),
-       url('./fonts/BagossStandardTRIAL-BoldItalic.ttf') format('truetype');
+  src: url('/fonts/BagossStandardTRIAL-BoldItalic.woff2') format('woff2'),
+       url('/fonts/BagossStandardTRIAL-BoldItalic.woff') format('woff'),
+       url('/fonts/BagossStandardTRIAL-BoldItalic.ttf') format('truetype');
   font-weight: 700;
   font-style: italic;
   font-display: swap;
