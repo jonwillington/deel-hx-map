@@ -41,6 +41,7 @@ jobs:
     - name: Build application
       run: npm run build
       env:
+        CI: false
         VITE_MAPBOX_TOKEN: ${{ secrets.VITE_MAPBOX_TOKEN }}
         VITE_SHEET_CSV: ${{ secrets.VITE_SHEET_CSV }}
         
