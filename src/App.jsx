@@ -7,6 +7,7 @@ import { MapComponent } from './components/Map/MapComponent'
 import { PremiumCard } from './components/PremiumCard'
 import { getImageEmbedInstructions } from './utils/imageUtils'
 import 'mapbox-gl/dist/mapbox-gl.css'
+import 'flag-icons/css/flag-icons.min.css'
 import './App.css'
 
 function App() {
@@ -140,7 +141,7 @@ function App() {
                 
                 <div className="create-listing-step">
                   <div className="step-number">3</div>
-                  <div className="step-content">For photos: Click the Photo cell → Insert → Image → Image in cell</div>
+                  <div className="step-content">For photos: Send image to yourself on Slack → Copy image URL → Paste in Photo cell</div>
                 </div>
                 
                 <div className="create-listing-step">

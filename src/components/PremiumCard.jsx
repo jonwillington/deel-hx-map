@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import { getCountryFlag, getListingType } from '../utils/locationUtils'
+import { Flag } from './Flag'
+import { getListingType } from '../utils/locationUtils'
 import { formatReadableDate } from '../utils/dateUtils'
 import { useImageUrl } from '../hooks/useImageUrl'
 
@@ -76,7 +77,7 @@ export const PremiumCard = ({ location, onClose, isClosing, segment, rowIndex = 
         </div>
         <div className="premium-card-image-overlay">
           <h3 className="premium-card-title-overlay">{location.City || ''}</h3>
-          <p className="premium-card-country-overlay">{getCountryFlag(location.Country)} {location.Country || ''}</p>
+          <p className="premium-card-country-overlay"><Flag country={location.Country} className="flag-overlay" /> {location.Country || ''}</p>
         </div>
         <button className="premium-card-close" onClick={onClose}>
           <svg viewBox="0 0 24 24" fill="currentColor">

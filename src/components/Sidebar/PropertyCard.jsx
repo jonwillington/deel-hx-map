@@ -1,4 +1,4 @@
-import { getCountryFlag } from '../../utils/locationUtils'
+import { Flag } from '../Flag'
 import { useImageUrl } from '../../hooks/useImageUrl'
 
 /**
@@ -59,7 +59,7 @@ export const PropertyCard = ({ row, itemIndex, isActive, loading, onClick, style
             ) : null}
         <div className="small-card-details">
           <div className="small-card-location" style={{ fontSize: '18px', fontWeight: '500', marginBottom: '2px', letterSpacing: '-0.3px', fontFamily: 'Bagoss Standard, sans-serif' }}>
-            {row.City || ''} {getCountryFlag(row.Country)}
+            <Flag country={row.Country} className="flag-inline" /> {row.City || ''}
           </div>
           <div className="small-card-dates" style={{ fontSize: '14px', color: '#6d6d70', marginBottom: '6px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
             {getDisplayText()}

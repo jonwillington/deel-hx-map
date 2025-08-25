@@ -18,22 +18,14 @@ export const getEmbeddedImages = async (gid = '0') => {
   try {
     // Method 1: Try Google Apps Script (preferred for embedded images)
     if (APPS_SCRIPT_URL) {
-      console.log('Fetching embedded images from Google Apps Script...')
       const appsScriptResponse = await fetch(`${APPS_SCRIPT_URL}?gid=${gid}`)
       
       if (appsScriptResponse.ok) {
         const appsScriptData = await appsScriptResponse.json()
-        console.log('Apps Script response:', appsScriptData)
         
         if (appsScriptData.success && appsScriptData.images) {
-          const imageCount = Object.keys(appsScriptData.images).length
-          console.log(`Successfully retrieved ${imageCount} embedded images from Apps Script`)
           return appsScriptData.images
-        } else {
-          console.warn('Apps Script returned no images:', appsScriptData.error || 'Unknown error')
         }
-      } else {
-        console.warn('Apps Script request failed:', appsScriptResponse.status, appsScriptResponse.statusText)
       }
     }
     

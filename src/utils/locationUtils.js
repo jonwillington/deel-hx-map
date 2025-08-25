@@ -168,6 +168,39 @@ export const getCountryFlag = (country) => {
 }
 
 /**
+ * Get ISO country code for country name (for flag libraries)
+ * @param {string} country - Country name  
+ * @returns {string} ISO 3166-1 alpha-2 country code
+ */
+export const getCountryCode = (country) => {
+  if (!country) return ''
+  
+  const countryToCode = {
+    'USA': 'US', 'United States': 'US',
+    'UK': 'GB', 'United Kingdom': 'GB',
+    'Spain': 'ES', 'France': 'FR', 'Germany': 'DE', 'Italy': 'IT',
+    'Netherlands': 'NL', 'Belgium': 'BE', 'Switzerland': 'CH', 'Austria': 'AT',
+    'Portugal': 'PT', 'Greece': 'GR', 'Turkey': 'TR', 'Poland': 'PL',
+    'Czech Republic': 'CZ', 'Hungary': 'HU', 'Slovakia': 'SK', 'Slovenia': 'SI',
+    'Croatia': 'HR', 'Serbia': 'RS', 'Bulgaria': 'BG', 'Romania': 'RO',
+    'Ukraine': 'UA', 'Russia': 'RU', 'Estonia': 'EE', 'Latvia': 'LV',
+    'Lithuania': 'LT', 'Finland': 'FI', 'Sweden': 'SE', 'Norway': 'NO',
+    'Denmark': 'DK', 'Iceland': 'IS', 'Ireland': 'IE',
+    'Canada': 'CA', 'Mexico': 'MX', 'Brazil': 'BR', 'Argentina': 'AR',
+    'Chile': 'CL', 'Peru': 'PE', 'Colombia': 'CO', 'Venezuela': 'VE',
+    'Japan': 'JP', 'China': 'CN', 'South Korea': 'KR', 'India': 'IN',
+    'Australia': 'AU', 'New Zealand': 'NZ', 'Singapore': 'SG',
+    'Thailand': 'TH', 'Vietnam': 'VN', 'Malaysia': 'MY', 'Indonesia': 'ID',
+    'Philippines': 'PH', 'Taiwan': 'TW', 'Hong Kong': 'HK',
+    'South Africa': 'ZA', 'Egypt': 'EG', 'Morocco': 'MA', 'Nigeria': 'NG',
+    'Kenya': 'KE', 'Israel': 'IL', 'UAE': 'AE', 'Saudi Arabia': 'SA',
+    'Qatar': 'QA', 'Lebanon': 'LB', 'Jordan': 'JO', 'Iran': 'IR'
+  }
+  
+  return countryToCode[country] || ''
+}
+
+/**
  * Resolve listing type from row (supports multiple header names or falls back to column E)
  * @param {Object} row - Property data row
  * @returns {string} Listing type ('sublets', 'exchange', or '')

@@ -70,123 +70,12 @@ export const useMap = (locations, onLocationSelect, loading) => {
         console.error('useMap:event error', e)
       })
       
-      // Add bounds reset on invalid coordinates
-      mapRef.current.on('moveend', () => {
-        try {
-          const center = mapRef.current.getCenter()
-          const zoom = mapRef.current.getZoom()
-          
-          // Check if we're in an invalid location
-          if (!isFinite(center.lng) || !isFinite(center.lat) || 
-              center.lat < -85 || center.lat > 85 || 
-              zoom < 1 || zoom > 18) {
-            console.warn('useMap: Invalid map state detected, resetting to safe location')
-            mapRef.current.easeTo({
-              center: [0, 20],
-              zoom: 2,
-              duration: 1000
-            })
-          }
-        } catch (error) {
-          console.error('useMap: Error checking map state:', error)
-        }
-      })
-
-      // Prevent extreme movements during drag/scroll
-      mapRef.current.on('movestart', () => {
-        try {
-          const center = mapRef.current.getCenter()
-          if (!isFinite(center.lng) || !isFinite(center.lat)) {
-            console.warn('useMap: Invalid coordinates at movestart, preventing movement')
-            mapRef.current.stop()
-            mapRef.current.easeTo({
-              center: [0, 20],
-              zoom: 2,
-              duration: 500
-            })
-          }
-        } catch (error) {
-          console.error('useMap: Error in movestart handler:', error)
-        }
-      })
-
-      // Additional safety check during movement
-      mapRef.current.on('move', () => {
-        try {
-          const center = mapRef.current.getCenter()
-          const zoom = mapRef.current.getZoom()
-          
-          // If we detect extreme coordinates during movement, stop and reset
-          if (!isFinite(center.lng) || !isFinite(center.lat) || 
-              center.lat < -90 || center.lat > 90 || 
-              center.lng < -180 || center.lng > 180) {
-            console.warn('useMap: Extreme coordinates detected during movement, stopping and resetting')
-            mapRef.current.stop()
-            mapRef.current.easeTo({
-              center: [0, 20],
-              zoom: 2,
-              duration: 500
-            })
-          }
-        } catch (error) {
-          console.error('useMap: Error in move handler:', error)
-        }
-      })
-
       mapRef.current.on('movestart', () => {
         try { console.log('useMap:event movestart', mapRef.current.getCenter().toArray()) } catch {}
       })
       mapRef.current.on('moveend', () => {
         try { console.log('useMap:event moveend', mapRef.current.getCenter().toArray()) } catch {}
       })
-
-      const origEaseTo = mapboxgl.Map.prototype.easeTo
-      mapRef.current.easeTo = function(options) {
-        const currentCenter = this.getCenter()
-        // Normalize target center to an object with lng/lat numbers
-        let targetCenterLng = currentCenter.lng
-        let targetCenterLat = currentCenter.lat
-        if (options && options.center != null) {
-          if (Array.isArray(options.center)) {
-            targetCenterLng = Number(options.center[0])
-            targetCenterLat = Number(options.center[1])
-          } else if (typeof options.center === 'object') {
-            targetCenterLng = Number(options.center.lng)
-            targetCenterLat = Number(options.center.lat)
-          }
-        }
-        
-        // Clamp coordinates to safe bounds
-        targetCenterLng = Math.max(-180, Math.min(180, targetCenterLng))
-        targetCenterLat = Math.max(-85, Math.min(85, targetCenterLat))
-        
-        // Ensure coordinates are finite
-        if (!isFinite(targetCenterLng) || !isFinite(targetCenterLat)) {
-          console.warn('useMap: Non-finite coordinates detected, using safe defaults')
-          targetCenterLng = 0
-          targetCenterLat = 20
-        }
-        let duration
-        if (options && typeof options.duration === 'number') {
-          // Respect explicit duration (used by our selection animation)
-          duration = options.duration
-        } else {
-          // Faster default animation when duration not specified
-          const baseDuration = 800
-          duration = calculateAnimationDuration(
-            [currentCenter.lng, currentCenter.lat],
-            [targetCenterLng, targetCenterLat],
-            baseDuration
-          )
-        }
-        console.log('useMap:easeTo', { from: [currentCenter.lng, currentCenter.lat], to: [targetCenterLng, targetCenterLat], duration })
-        return origEaseTo.call(this, {
-          ...options,
-          center: [targetCenterLng, targetCenterLat],
-          duration,
-          easing: (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t)
-        })
-      }
     }
     initMap()
 
@@ -218,6 +107,7 @@ export const useMap = (locations, onLocationSelect, loading) => {
 
       for (const row of locations) {
         console.log('useMap: Geocoding location:', row.City, row.Country, 'Full row:', row)
+        console.log('useMap: Available fields in row:', Object.keys(row))
         const coords = await geocode(row)
         if (!coords) {
           console.log('useMap: No coordinates found for:', row.City)
@@ -229,9 +119,16 @@ export const useMap = (locations, onLocationSelect, loading) => {
           .setLngLat(coords)
           .addTo(mapRef.current)
 
-        // Add click event to marker
+        // Add click event to marker and ensure proper initial styling
         const markerElement = marker.getElement()
         markerElement.style.cursor = 'pointer'
+        
+        // Ensure the marker has black inner circle from the start
+        const svg = markerElement.querySelector('svg')
+        const innerCircle = markerElement.querySelector('svg circle')
+        if (svg) svg.style.fill = '#ffdb5f'  // Golden yellow background
+        if (innerCircle) innerCircle.style.fill = '#000'  // Black inner circle
+        
         markerElement.addEventListener('click', () => {
           // Find the index of this location in the filtered locations array
           const locationIndex = locations.findIndex(loc => loc === row)
@@ -263,16 +160,25 @@ export const useMap = (locations, onLocationSelect, loading) => {
 
   // Handle location selection - just for map animation
   const handleLocationSelect = useCallback((index) => {
+    console.log('handleLocationSelect: Called with index:', index)
+    console.log('handleLocationSelect: Total locations:', locations.length)
+    console.log('handleLocationSelect: Map ref exists:', !!mapRef.current)
+    
     if (!mapRef.current) {
+      console.log('handleLocationSelect: No map ref, returning')
       return
     }
     
     if (index < 0 || index >= locations.length) {
+      console.log('handleLocationSelect: Invalid index:', index, 'locations length:', locations.length)
       return
     }
 
     const location = locations[index]
+    console.log('handleLocationSelect: Selected location:', location)
+    console.log('handleLocationSelect: Location city/country:', location.City, location.Country)
     const marker = locationToMarkerMapRef.current.get(location)
+    console.log('handleLocationSelect: Found marker for location:', !!marker)
 
     // If markers aren't ready yet, queue this selection
     if (!marker) {
@@ -350,8 +256,6 @@ export const useMap = (locations, onLocationSelect, loading) => {
     const duration = Math.max(baseDuration, Math.min(baseDuration * distanceMultiplier, 1600))
 
     // Animate to marker with world rotation
-    // No marker style resets needed after movement
-
     mapRef.current.easeTo({
       center: [Number(targetLng), Number(validLat)],
       zoom: 2,

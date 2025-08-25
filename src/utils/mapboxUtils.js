@@ -9,6 +9,8 @@ export const geocode = async (row) => {
   // Use city only if country is not available
   const query = country ? [city, country].filter(Boolean).join(', ') : city
   
+  console.log('geocode: Row data:', row)
+  console.log('geocode: City:', city, 'Country:', country)
   console.log('geocode: Query:', query)
   
   if (!query) {
@@ -77,6 +79,16 @@ export const calculateDistance = (point1, point2) => {
  */
 export const calculateAnimationDuration = (from, to, baseDuration = 1000) => {
   const distance = calculateDistance(from, to)
-  const distanceMultiplier = Math.min(distance * 2000, 3) // Cap at 3x for very long distances
-  return Math.max(baseDuration, Math.min(baseDuration * distanceMultiplier, 2500))
+  
+  // If distance is very small (less than 0.001 degrees), use minimum duration
+  if (distance < 0.001) {
+    return Math.min(baseDuration, 500) // Very short animation for tiny movements
+  }
+  
+  // For normal distances, calculate with reasonable multiplier
+  const distanceMultiplier = Math.min(distance * 800, 2.5) // Reduced multiplier and cap
+  const calculatedDuration = baseDuration * distanceMultiplier
+  
+  // Ensure duration is within reasonable bounds (200ms to 2500ms)
+  return Math.max(200, Math.min(calculatedDuration, 2500))
 }
