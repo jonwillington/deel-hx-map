@@ -34,10 +34,12 @@ export const Sidebar = ({
         onSegmentChange={onSegmentChange}
       />
       
-      <MonthFilter 
-        selectedMonth={selectedMonth}
-        onMonthChange={onMonthChange}
-      />
+      {selectedSegment === 'sublets' && (
+        <MonthFilter 
+          selectedMonth={selectedMonth}
+          onMonthChange={onMonthChange}
+        />
+      )}
       
       <div className="sidebar-list">
         {/* Render list only after skeleton has fully faded out to avoid overlap/jump */}
@@ -67,7 +69,21 @@ export const Sidebar = ({
         )}
         
         {filteredLocations.length === 0 && !loading && (
-          <div className="empty">No properties</div>
+          <div className="empty">
+            <img src="/img/No Content.svg" alt="No content illustration" className="empty-lock-icon" />
+            <div className="empty-text">
+              {selectedSegment === 'exchanges' || selectedSegment === 'exchange' 
+                ? 'No exchanges currently live' 
+                : 'Nothing available yet'
+              }
+            </div>
+            <div className="empty-caption">
+              {selectedSegment === 'exchanges' || selectedSegment === 'exchange'
+                ? 'Please check back again soon. Are you interested in listing your place? Add your location and preferred dates to the sheet.'
+                : 'Please check back again soon'
+              }
+            </div>
+          </div>
         )}
       </div>
     </div>

@@ -10,7 +10,7 @@ export const MonthSeparator = ({ month }) => {
   if (month === 'FLEXIBLE') {
     return (
       <div className="year-separator">
-        <div className="year-separator-text">FLEXIBLE</div>
+        <div className="year-separator-text">Flexible - Open to exchange</div>
       </div>
     )
   }

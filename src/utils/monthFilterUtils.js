@@ -17,8 +17,8 @@ export const propertyOverlapsMonth = (row, targetMonthKey) => {
   // Parse property start date
   const startDate = parseDate(row.Start)
   if (!startDate) {
-    // If no start date, assume it's flexible and overlaps any month
-    return true
+    // If no start date, it's flexible - exclude when specific month is selected
+    return false
   }
   
   // For properties with duration, calculate end date

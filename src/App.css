@@ -811,14 +811,40 @@ body {
 }
 
 .empty {
-  color: #999;
-  font-size: 14px;
-  padding: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  font-style: italic;
+  padding: 40px 20px;
   background: rgba(255, 255, 255, 0.5);
   border-radius: 12px;
   margin: 20px 0;
+  gap: 16px;
+}
+
+.empty-lock-icon {
+  width: 128px;
+  height: 128px;
+}
+
+.empty-text {
+  font-size: 24px;
+  color: #333;
+  font-family: 'Bagoss Standard', sans-serif;
+  font-weight: 500;
+  line-height: 1.4;
+  max-width: 230px;
+}
+
+.empty-caption {
+  font-size: 14px;
+  color: #666;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  line-height: 1.4;
+  max-width: 220px;
 }
 
 /* Premium Card Styles */
@@ -846,7 +872,7 @@ body {
 .premium-card-closing {
   animation: premiumCardSlideOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   overflow: hidden;
-  max-height: calc(100vh - 48px);
+  max-height: 90vh;
   display: flex;
   flex-direction: column;
 }
@@ -1564,7 +1590,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgb(196, 177, 249);
+  background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
   z-index: 2147483647;
   display: flex;
@@ -1596,7 +1622,7 @@ body {
 }
 
 .create-listing-banner {
-  height: 128px;
+  height: 168px;
   border-radius: 16px 16px 0 0;
   margin: 0;
   overflow: hidden;
@@ -1651,21 +1677,21 @@ body {
 }
 
 .step-number {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   background: rgb(196, 177, 249);
   color: #1a1a1a;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 600;
   flex-shrink: 0;
 }
 
 .step-content {
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.5;
   color: #1a1a1a;
   padding-top: 2px;

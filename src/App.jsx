@@ -166,7 +166,7 @@ function App() {
             </div>
             
             <div className="modal-body">
-              <h3>To create a listing,<br />follow these steps</h3>
+              <h3>To create a listing,<br />follow these steps:</h3>
               
               <div className="create-listing-steps">
                 <div className="create-listing-step">
@@ -181,7 +181,7 @@ function App() {
                 
                 <div className="create-listing-step">
                   <div className="step-number">3</div>
-                  <div className="step-content">For photos: Send image to yourself on Slack → Copy image URL → Paste in Photo cell</div>
+                  <div className="step-content">For photos: Follow the instructions on Slack on how to obtain an image URL</div>
                 </div>
                 
                 <div className="create-listing-step">
