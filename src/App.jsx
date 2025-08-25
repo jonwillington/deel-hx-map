@@ -75,7 +75,7 @@ function App() {
         <p>Please visit this site on a desktop or laptop computer for the best experience.</p>
       </div>
 
-      <div style={{ height: '100vh', width: '100vw', position: 'relative' }}>
+      <div style={{ height: '100vh', width: '100vw' }}>
         <Sidebar 
           filteredLocations={filteredLocations}
           selectedIndex={selectedIndex}
