@@ -77,7 +77,6 @@ export const PremiumCard = ({ location, onClose, isClosing, segment, rowIndex = 
         </div>
         <div className="premium-card-image-overlay">
           <h3 className="premium-card-title-overlay">{location.City || ''}</h3>
-          <p className="premium-card-country-overlay"><Flag country={location.Country} className="flag-overlay" /> {location.Country || ''}</p>
         </div>
         <button className="premium-card-close" onClick={onClose}>
           <svg viewBox="0 0 24 24" fill="currentColor">
@@ -99,6 +98,13 @@ export const PremiumCard = ({ location, onClose, isClosing, segment, rowIndex = 
       {/* Scrollable cells section */}
       <div className="premium-card-scrollable" ref={scrollableRef}>
         <div className="premium-card-cells">
+          <div className="premium-card-cell">
+            <div className="premium-card-cell-label">Country</div>
+            <div className="premium-card-cell-value">
+              <Flag country={location.Country} className="flag-inline" /> {location.Country || 'Not specified'}
+            </div>
+          </div>
+          
           <div className="premium-card-cell">
             <div className="premium-card-cell-label">Type</div>
             <div className="premium-card-cell-value">
