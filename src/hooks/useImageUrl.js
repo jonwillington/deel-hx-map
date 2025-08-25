@@ -21,6 +21,13 @@ export const useImageUrl = (location, rowIndex = null, segment = 'sublets') => {
         return
       }
 
+      // Quick check for obvious cases where there's no image
+      if (!location.Photo || location.Photo.trim() === '') {
+        setImageUrl(null)
+        setLoading(false)
+        return
+      }
+
       try {
         setLoading(true)
         setError(null)

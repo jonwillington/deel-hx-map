@@ -41,7 +41,7 @@ export const useMap = (locations, onLocationSelect, loading) => {
       mapRef.current = new mapboxgl.Map({
         container: mapContainerRef.current,
         style: 'mapbox://styles/jonathanwillington/cm8ym2u5b003d01r431z7872k',
-        center: [0, 20],
+        center: [30, 20],
         zoom: 2,
         interactive: true,
         dragPan: { deceleration: 0.98, maxSpeed: 800 },
@@ -108,7 +108,18 @@ export const useMap = (locations, onLocationSelect, loading) => {
       locationToMarkerMapRef.current.clear()
       console.log('useMap: Markers cleared')
 
-      for (const row of locations) {
+      // Remove existing source and layers if they exist
+      if (mapRef.current.getSource('locations')) {
+        mapRef.current.removeLayer('clusters')
+        mapRef.current.removeLayer('cluster-count')
+        mapRef.current.removeLayer('unclustered-point')
+        mapRef.current.removeSource('locations')
+      }
+
+      // Collect all coordinates and create GeoJSON
+      const features = []
+      for (let i = 0; i < locations.length; i++) {
+        const row = locations[i]
         console.log('useMap: Geocoding location:', row.City, row.Country, 'Full row:', row)
         console.log('useMap: Available fields in row:', Object.keys(row))
         const coords = await geocode(row)
@@ -118,35 +129,123 @@ export const useMap = (locations, onLocationSelect, loading) => {
         }
         console.log('useMap: Found coordinates:', coords, 'for:', row.City)
 
-        const marker = new mapboxgl.Marker({ color: '#ffdb5f' })
-          .setLngLat(coords)
-          .addTo(mapRef.current)
-
-        // Add click event to marker and ensure proper initial styling
-        const markerElement = marker.getElement()
-        markerElement.style.cursor = 'pointer'
-        
-        // Ensure the marker has black inner circle from the start
-        const svg = markerElement.querySelector('svg')
-        const innerCircle = markerElement.querySelector('svg circle')
-        if (svg) svg.style.fill = '#ffdb5f'  // Golden yellow background
-        if (innerCircle) innerCircle.style.fill = '#000'  // Black inner circle
-        
-        markerElement.addEventListener('click', () => {
-          // Find the index of this location in the filtered locations array
-          const locationIndex = locations.findIndex(loc => loc === row)
-          if (locationIndex !== -1) {
-            console.log('useMap: Marker clicked for:', row.City, 'at index:', locationIndex)
-            onLocationSelect(locationIndex)
+        features.push({
+          type: 'Feature',
+          properties: {
+            id: i,
+            location: row
+          },
+          geometry: {
+            type: 'Point',
+            coordinates: coords
           }
         })
-
-        markersRef.current.push(marker)
-        // Map the actual row object identity to its marker
-        locationToMarkerMapRef.current.set(row, marker)
-        
-        console.log('useMap: Added marker for:', row.City, 'at coords:', coords)
       }
+
+      // Add GeoJSON source with clustering
+      mapRef.current.addSource('locations', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: features
+        },
+        cluster: true,
+        clusterMaxZoom: 14, // Max zoom to cluster points
+        clusterRadius: 50 // Radius of each cluster when clustering points
+      })
+
+      // Add cluster layer
+      mapRef.current.addLayer({
+        id: 'clusters',
+        type: 'circle',
+        source: 'locations',
+        filter: ['has', 'point_count'],
+        paint: {
+          'circle-color': '#ffdb5f',
+          'circle-radius': [
+            'step',
+            ['get', 'point_count'],
+            20, 100,
+            30, 750,
+            40
+          ]
+        }
+      })
+
+      // Add cluster count layer
+      mapRef.current.addLayer({
+        id: 'cluster-count',
+        type: 'symbol',
+        source: 'locations',
+        filter: ['has', 'point_count'],
+        layout: {
+          'text-field': '{point_count_abbreviated}',
+          'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+          'text-size': 12
+        },
+        paint: {
+          'text-color': '#000'
+        }
+      })
+
+      // Add unclustered point layer
+      mapRef.current.addLayer({
+        id: 'unclustered-point',
+        type: 'circle',
+        source: 'locations',
+        filter: ['!', ['has', 'point_count']],
+        paint: {
+          'circle-color': '#ffdb5f',
+          'circle-radius': 8,
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#000'
+        }
+      })
+
+      // Add click handlers
+      mapRef.current.on('click', 'clusters', (e) => {
+        const features = mapRef.current.queryRenderedFeatures(e.point, {
+          layers: ['clusters']
+        })
+        const clusterId = features[0].properties.cluster_id
+        mapRef.current.getSource('locations').getClusterExpansionZoom(
+          clusterId,
+          (err, zoom) => {
+            if (err) return
+
+            mapRef.current.easeTo({
+              center: features[0].geometry.coordinates,
+              zoom: zoom
+            })
+          }
+        )
+      })
+
+      mapRef.current.on('click', 'unclustered-point', (e) => {
+        const features = mapRef.current.queryRenderedFeatures(e.point, {
+          layers: ['unclustered-point']
+        })
+        if (features.length > 0) {
+          const locationIndex = features[0].properties.id
+          console.log('useMap: Marker clicked for:', locations[locationIndex].City, 'at index:', locationIndex)
+          onLocationSelect(locationIndex)
+        }
+      })
+
+      // Change cursor on hover
+      mapRef.current.on('mouseenter', 'clusters', () => {
+        mapRef.current.getCanvas().style.cursor = 'pointer'
+      })
+      mapRef.current.on('mouseleave', 'clusters', () => {
+        mapRef.current.getCanvas().style.cursor = ''
+      })
+
+      mapRef.current.on('mouseenter', 'unclustered-point', () => {
+        mapRef.current.getCanvas().style.cursor = 'pointer'
+      })
+      mapRef.current.on('mouseleave', 'unclustered-point', () => {
+        mapRef.current.getCanvas().style.cursor = ''
+      })
 
       // If there was a pending selection, try animating to it now
       if (pendingSelectIndexRef.current != null) {
@@ -180,60 +279,39 @@ export const useMap = (locations, onLocationSelect, loading) => {
     const location = locations[index]
     console.log('handleLocationSelect: Selected location:', location)
     console.log('handleLocationSelect: Location city/country:', location.City, location.Country)
-    const marker = locationToMarkerMapRef.current.get(location)
-    console.log('handleLocationSelect: Found marker for location:', !!marker)
-
-    // If markers aren't ready yet, queue this selection
-    if (!marker) {
+    
+    // Get coordinates from the GeoJSON source
+    const source = mapRef.current.getSource('locations')
+    if (!source) {
       pendingSelectIndexRef.current = index
       return
     }
     
-    // Highlight the selected marker with color change
-    markersRef.current.forEach((m) => {
-      const element = m.getElement()
-      const svg = element.querySelector('svg')
-      const innerCircle = element.querySelector('svg circle')
-      if (m === marker) {
-        // Active marker: purple color
-        if (svg) svg.style.fill = 'rgb(225, 215, 251)'
-        if (innerCircle) innerCircle.style.fill = '#000'
-      } else {
-        // Inactive markers: golden yellow
-        if (svg) svg.style.fill = '#ffdb5f'
-        if (innerCircle) innerCircle.style.fill = '#000'
-      }
-    })
-
-    // Subtly fade other markers during the spin to reduce visual noise
-    markersRef.current.forEach((m) => {
-      const element = m.getElement()
-      if (m !== marker) {
-        element.style.transition = (element.style.transition ? element.style.transition + ', ' : '') + 'opacity 0.2s ease'
-        element.style.opacity = '0.2'
-      } else {
-        element.style.opacity = '1'
-      }
-    })
-
-    // Get marker coordinates
-    const ll = marker.getLngLat()
+    // Find the feature for this location
+    const features = source._data.features
+    const feature = features.find(f => f.properties.id === index)
+    if (!feature) {
+      pendingSelectIndexRef.current = index
+      return
+    }
+    
+    const coords = feature.geometry.coordinates
     const currentCenter = mapRef.current.getCenter()
     
     // Validate coordinates
-    if (!isFinite(ll.lng) || !isFinite(ll.lat) || !isFinite(currentCenter.lng) || !isFinite(currentCenter.lat)) {
-      console.warn('useMap:select: invalid centers', { ll, currentCenter })
+    if (!isFinite(coords[0]) || !isFinite(coords[1]) || !isFinite(currentCenter.lng) || !isFinite(currentCenter.lat)) {
+      console.warn('useMap:select: invalid centers', { coords, currentCenter })
       return
     }
     
     // Clamp coordinates to valid ranges
-    const validLng = Math.max(-180, Math.min(180, ll.lng))
-    const validLat = Math.max(-85, Math.min(85, ll.lat))
+    const validLng = Math.max(-180, Math.min(180, coords[0]))
+    const validLat = Math.max(-85, Math.min(85, coords[1]))
     const validCurrentLng = Math.max(-180, Math.min(180, currentCenter.lng))
     const validCurrentLat = Math.max(-85, Math.min(85, currentCenter.lat))
     
-    if (validLng !== ll.lng || validLat !== ll.lat) {
-      console.warn('useMap:select: coordinates clamped', { original: ll, clamped: [validLng, validLat] })
+    if (validLng !== coords[0] || validLat !== coords[1]) {
+      console.warn('useMap:select: coordinates clamped', { original: coords, clamped: [validLng, validLat] })
     }
     
     // Calculate the shortest rotation to make the marker visible

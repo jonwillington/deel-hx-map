@@ -2,15 +2,19 @@ import { useState } from 'react'
 import { useLocations } from './hooks/useLocations'
 import { useFilteredLocations } from './hooks/useFilteredLocations'
 import { useMap } from './hooks/useMap'
+import { useAuth } from './hooks/useAuth'
 import { Sidebar } from './components/Sidebar/Sidebar'
 import { MapComponent } from './components/Map/MapComponent'
 import { PremiumCard } from './components/PremiumCard'
+import { PasswordPage } from './components/PasswordPage'
+import { DevTools } from './components/DevTools'
 import { getImageEmbedInstructions } from './utils/imageUtils'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import 'flag-icons/css/flag-icons.min.css'
 import './App.css'
 
 function App() {
+  const { isAuthenticated, isLoading, authenticate, logout, toggleAuth } = useAuth()
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const [showPremiumCard, setShowPremiumCard] = useState(false)
   const [isClosingPremiumCard, setIsClosingPremiumCard] = useState(false)
@@ -18,6 +22,7 @@ function App() {
   const [selectedSegment, setSelectedSegment] = useState('sublets')
   const [selectedMonth, setSelectedMonth] = useState('all')
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [passwordError, setPasswordError] = useState('')
 
   // Custom hooks - pass selectedSegment to dynamically fetch correct sheet
   const { locations, loading, error, showSkeletons } = useLocations(selectedSegment)
@@ -77,6 +82,24 @@ function App() {
     }, 300) // Match the animation duration
   }
 
+  // Handle password submission
+  const handlePasswordSubmit = (password) => {
+    const result = authenticate(password)
+    if (!result.success) {
+      setPasswordError(result.error)
+    }
+  }
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</div>
+  }
+
+  // Show password page if not authenticated
+  if (!isAuthenticated) {
+    return <PasswordPage onPasswordSubmit={handlePasswordSubmit} error={passwordError} />
+  }
+
   return (
     <>
       {/* Mobile message for screens < 600px */}
@@ -119,6 +142,8 @@ function App() {
             rowIndex={selectedIndex}
           />
         )}
+        
+        <DevTools onLogout={logout} onToggleAuth={toggleAuth} />
       </div>
 
       {/* Create Listing Modal - Rendered at root level */}

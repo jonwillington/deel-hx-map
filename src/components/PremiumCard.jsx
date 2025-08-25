@@ -61,18 +61,19 @@ export const PremiumCard = ({ location, onClose, isClosing, segment, rowIndex = 
     <div className={`premium-card ${isClosing ? 'premium-card-closing' : ''}`}>
       {/* Full-width image at top */}
       <div className="premium-card-image">
-        {imageUrl ? (
+        {imageUrl && !imageLoading ? (
           <img 
+            key={`${location.Name}-${location.City}-${rowIndex}`}
             src={imageUrl} 
             alt="Property" 
             onError={(e) => {
               console.error('Image failed to load:', e.target.src.substring(0, 100) + '...')
               e.target.style.display = 'none'
-              e.target.nextSibling.style.display = 'block'
+              e.target.nextSibling.style.display = 'flex'
             }}
           />
         ) : null}
-        <div className="premium-card-placeholder" style={{ display: imageUrl ? 'none' : 'flex' }}>
+        <div className="premium-card-placeholder" style={{ display: (imageUrl && !imageLoading) ? 'none' : 'flex' }}>
           <svg width="48" height="48" viewBox="0 0 24 24" fill="#e0e0e0">
             <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
           </svg>
@@ -119,41 +120,51 @@ export const PremiumCard = ({ location, onClose, isClosing, segment, rowIndex = 
             </div>
           )}
           
-                          <div className="premium-card-cell">
-                  <div className="premium-card-cell-label">
-                    {segment === 'exchange' || segment === 'exchanges' ? 'Interested in' : 'Available from'}
-                  </div>
-            <div className="premium-card-cell-value">
-              {(segment === 'exchange' || segment === 'exchanges') ? 
-                (location['Destinations interested in swapping'] || 'Not specified') :
-                (location.Status && location.Status.toUpperCase() === 'ASK' ? 
-                  'Contact for availability' :
-                  (() => {
-                    if (!location.Start) return 'Not specified'
-                    const formattedDate = formatReadableDate(location.Start)
-                    return formattedDate
-                  })()
-                )
-              }
-            </div>
-          </div>
+                          {(!location.Status || location.Status.toLowerCase() !== 'flexible') && (
+                            <div className="premium-card-cell">
+                              <div className="premium-card-cell-label">
+                                {segment === 'exchange' || segment === 'exchanges' ? 'Interested in' : 'Available from'}
+                              </div>
+                              <div className="premium-card-cell-value">
+                                {(segment === 'exchange' || segment === 'exchanges') ? 
+                                  (location['Destinations interested in swapping'] || 'Not specified') :
+                                  (location.Status && location.Status.toUpperCase() === 'ASK' ? 
+                                    'Contact for availability' :
+                                    (() => {
+                                      if (!location.Start) return 'Not specified'
+                                      const formattedDate = formatReadableDate(location.Start)
+                                      return formattedDate
+                                    })()
+                                  )
+                                }
+                              </div>
+                            </div>
+                          )}
 
-          <div className="premium-card-cell">
-            <div className="premium-card-cell-label">
-              {segment === 'exchange' || segment === 'exchanges' ? 'Target time' : 'Duration'}
-            </div>
-            <div className="premium-card-cell-value">
-              {(segment === 'exchange' || segment === 'exchanges') ? 
-                (location['Target time'] || 'Not specified') :
-                (() => {
-                  const duration = location['Duration '] || location.Duration || location.duration || ''
-                  return (duration && typeof duration === 'string' && duration.trim()) 
-                    ? duration.trim() 
-                    : 'Not specified'
-                })()
-              }
-            </div>
-          </div>
+                          {(!location.Status || location.Status.toLowerCase() !== 'flexible') && (
+                            <div className="premium-card-cell">
+                              <div className="premium-card-cell-label">
+                                {segment === 'exchange' || segment === 'exchanges' ? 'Target time' : 'Duration'}
+                              </div>
+                              <div className="premium-card-cell-value">
+                                {(segment === 'exchange' || segment === 'exchanges') ? 
+                                  (location['Target time'] || 'Not specified') :
+                                  (() => {
+                                    const duration = location['Duration '] || location.Duration || location.duration || ''
+                                    if (duration && typeof duration === 'string' && duration.trim()) {
+                                      const trimmedDuration = duration.trim()
+                                      // Format "1 month" to "1 Month"
+                                      if (trimmedDuration === '1 month') {
+                                        return '1 Month'
+                                      }
+                                      return trimmedDuration
+                                    }
+                                    return 'Not specified'
+                                  })()
+                                }
+                              </div>
+                            </div>
+                          )}
 
                           {(segment !== 'exchange' && segment !== 'exchanges') && location['Dates free start 2'] && (
                   <div className="premium-card-cell">
@@ -172,7 +183,7 @@ export const PremiumCard = ({ location, onClose, isClosing, segment, rowIndex = 
             <div className="premium-card-cell-value">
               {location['Entire place'] ? 
                 <span className="premium-card-toggle premium-card-toggle-yes">Yes</span> : 
-                <span className="premium-card-toggle premium-card-toggle-no">No</span>
+                <span className="premium-card-toggle premium-card-toggle-no">Sharing</span>
               }
             </div>
           </div>

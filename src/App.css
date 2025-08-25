@@ -1317,7 +1317,6 @@ body {
   margin: 0;
   font-weight: 400;
   text-align: left;
-  font-family: 'Inter';
   max-width: 100%;
   letter-spacing: -0.2px;
 }
@@ -1565,7 +1564,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgb(196, 177, 249);
   backdrop-filter: blur(4px);
   z-index: 2147483647;
   display: flex;
@@ -1792,6 +1791,15 @@ body {
   box-shadow: 
     0 8px 24px rgba(0, 0, 0, 0.12),
     0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Password form styling */
+.password-form h2 {
+  margin: 0 0 10px 0;
+  font-size: 28px;
+  font-weight: 500;
+  color: #333;
+  font-family: 'Bagoss Standard', sans-serif;
 }
 
 /* Mobile message for screens narrower than 600px */

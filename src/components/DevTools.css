@@ -1,0 +1,138 @@
+.dev-tools-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10000;
+  font-size: 18px;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.dev-tools-toggle:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.1);
+}
+
+.dev-tools-toggle.open {
+  background: #667eea;
+}
+
+.dev-tools-panel {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 200px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.dev-tools-header {
+  background: #f8f9fa;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.dev-tools-header h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  color: #333;
+}
+
+.dev-tools-content {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dev-btn {
+  padding: 10px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logout-btn {
+  background: #ff4757;
+  color: white;
+}
+
+.logout-btn:hover {
+  background: #ff3742;
+}
+
+.auth-btn {
+  background: #667eea;
+  color: white;
+}
+
+.auth-btn:hover {
+  background: #5a6fd8;
+}
+
+.dev-info {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #e9ecef;
+  text-align: center;
+}
+
+.dev-info small {
+  color: #666;
+  font-size: 11px;
+}
+
+@media (max-width: 768px) {
+  .dev-tools-panel {
+    right: 10px;
+    width: 180px;
+  }
+  
+  .dev-tools-toggle {
+    right: 10px;
+    top: 10px;
+    width: 45px;
+    height: 45px;
+    font-size: 16px;
+  }
+}
