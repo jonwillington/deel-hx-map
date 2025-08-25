@@ -143,7 +143,9 @@ function App() {
           />
         )}
         
-        <DevTools onLogout={logout} onToggleAuth={toggleAuth} />
+        {import.meta.env.DEV && (
+          <DevTools onLogout={logout} onToggleAuth={toggleAuth} />
+        )}
       </div>
 
       {/* Create Listing Modal - Rendered at root level */}
