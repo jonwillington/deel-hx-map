@@ -11,7 +11,7 @@ import { useState } from 'react'
  * @param {string} props.segment - Current segment ('sublets' or 'exchange')
  * @returns {JSX.Element}
  */
-export const MapComponent = ({ locations, onLocationSelect, loading, error, mapRef, segment, showCreateModal, setShowCreateModal }) => {
+export const MapComponent = ({ locations, onLocationSelect, loading, error, mapRef, segment, showCreateModal, setShowCreateModal, refreshMarkers }) => {
 
   return (
     <div className="map-area">
@@ -19,8 +19,8 @@ export const MapComponent = ({ locations, onLocationSelect, loading, error, mapR
         <div style={{ 
           position: 'absolute', 
           zIndex: 2, 
-          left: 16, 
-          top: 12, 
+          left: '380px', 
+          top: '20px', 
           padding: '12px 16px', 
           background: '#1a0d3f', 
           borderRadius: 6, 
@@ -57,6 +57,28 @@ export const MapComponent = ({ locations, onLocationSelect, loading, error, mapR
       )}
 
       <div ref={mapRef} style={{ position: 'absolute', inset: 0 }} />
+      
+      {/* Temporary Refresh Button for El Born Fix */}
+      {refreshMarkers && (
+        <button 
+          onClick={refreshMarkers}
+          style={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            zIndex: 10,
+            padding: '8px 12px',
+            background: '#1a0d3f',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '12px'
+          }}
+        >
+          Refresh Markers
+        </button>
+      )}
       
       {/* Create Listing Button */}
       <button 

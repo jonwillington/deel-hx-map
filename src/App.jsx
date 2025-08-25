@@ -16,11 +16,12 @@ function App() {
   const [isClosingPremiumCard, setIsClosingPremiumCard] = useState(false)
   const [currentLocation, setCurrentLocation] = useState(null)
   const [selectedSegment, setSelectedSegment] = useState('sublets')
+  const [selectedMonth, setSelectedMonth] = useState('all')
   const [showCreateModal, setShowCreateModal] = useState(false)
 
   // Custom hooks - pass selectedSegment to dynamically fetch correct sheet
   const { locations, loading, error, showSkeletons } = useLocations(selectedSegment)
-  const filteredLocations = useFilteredLocations(locations, selectedSegment)
+  const filteredLocations = useFilteredLocations(locations, selectedSegment, selectedMonth)
   
   // Handle property selection
   function handleSelect(index) {
@@ -46,11 +47,20 @@ function App() {
   }
 
   // Map hook - must be after handleSelect is defined
-  const { mapContainerRef, handleLocationSelect } = useMap(filteredLocations, handleSelect, loading)
+  const { mapContainerRef, handleLocationSelect, refreshMarkers } = useMap(filteredLocations, handleSelect, loading)
 
   // Handle segment change
   const handleSegmentChange = (segment) => {
     setSelectedSegment(segment)
+    setSelectedIndex(-1)
+    setShowPremiumCard(false)
+    setCurrentLocation(null)
+    setSelectedMonth('all') // Reset month filter when changing segments
+  }
+
+  // Handle month filter change
+  const handleMonthChange = (month) => {
+    setSelectedMonth(month)
     setSelectedIndex(-1)
     setShowPremiumCard(false)
     setCurrentLocation(null)
@@ -82,8 +92,10 @@ function App() {
           loading={loading}
           showSkeletons={showSkeletons}
           selectedSegment={selectedSegment}
+          selectedMonth={selectedMonth}
           onSelect={handleSelect}
           onSegmentChange={handleSegmentChange}
+          onMonthChange={handleMonthChange}
         />
 
         <MapComponent 
@@ -95,6 +107,7 @@ function App() {
           segment={selectedSegment}
           showCreateModal={showCreateModal}
           setShowCreateModal={setShowCreateModal}
+          refreshMarkers={refreshMarkers}
         />
         
         {(showPremiumCard || isClosingPremiumCard) && (
@@ -122,8 +135,10 @@ function App() {
               </svg>
             </button>
             
-            {/* Illustration space */}
-            <div className="create-listing-illustration"></div>
+            {/* Banner image */}
+            <div className="create-listing-banner">
+              <img src="/img/banner.jpg" alt="Create listing banner" />
+            </div>
             
             <div className="modal-body">
               <h3>To create a listing,<br />follow these steps</h3>

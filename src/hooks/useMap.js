@@ -96,6 +96,9 @@ export const useMap = (locations, onLocationSelect, loading) => {
       console.log('useMap: No map ref, no locations, or still loading - skipping markers')
       return
     }
+    
+    // Force marker recreation to apply new geocoding logic
+    console.log('useMap: Force recreating markers to apply updated geocoding logic')
 
     const addMarkers = async () => {
       console.log('useMap: Clearing existing markers, count:', markersRef.current.length)
@@ -266,8 +269,58 @@ export const useMap = (locations, onLocationSelect, loading) => {
     })
   }, [locations])
 
+  // Manual refresh function to force marker recreation
+  const refreshMarkers = useCallback(() => {
+    console.log('useMap: Manual marker refresh requested')
+    if (mapRef.current && locations.length && !loading) {
+      const addMarkers = async () => {
+        console.log('useMap: Clearing existing markers, count:', markersRef.current.length)
+        markersRef.current.forEach(marker => marker.remove())
+        markersRef.current = []
+        locationToMarkerMapRef.current.clear()
+        console.log('useMap: Markers cleared')
+
+        for (const row of locations) {
+          console.log('useMap: Geocoding location:', row.City, row.Country, 'Full row:', row)
+          const coords = await geocode(row)
+          if (!coords) {
+            console.log('useMap: No coordinates found for:', row.City)
+            continue
+          }
+          console.log('useMap: Found coordinates:', coords, 'for:', row.City)
+
+          const marker = new mapboxgl.Marker({ color: '#ffdb5f' })
+            .setLngLat(coords)
+            .addTo(mapRef.current)
+
+          const markerElement = marker.getElement()
+          markerElement.style.cursor = 'pointer'
+          
+          const svg = markerElement.querySelector('svg')
+          const innerCircle = markerElement.querySelector('svg circle')
+          if (svg) svg.style.fill = '#ffdb5f'
+          if (innerCircle) innerCircle.style.fill = '#000'
+          
+          markerElement.addEventListener('click', () => {
+            const locationIndex = locations.findIndex(loc => loc === row)
+            if (locationIndex !== -1) {
+              console.log('useMap: Marker clicked for:', row.City, 'at index:', locationIndex)
+              onLocationSelect(locationIndex)
+            }
+          })
+
+          markersRef.current.push(marker)
+          locationToMarkerMapRef.current.set(row, marker)
+          console.log('useMap: Added marker for:', row.City, 'at coords:', coords)
+        }
+      }
+      addMarkers()
+    }
+  }, [locations, loading, onLocationSelect])
+
   return {
     mapContainerRef,
-    handleLocationSelect
+    handleLocationSelect,
+    refreshMarkers
   }
 }

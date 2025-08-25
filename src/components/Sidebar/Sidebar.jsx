@@ -1,4 +1,5 @@
 import { SegmentedControl } from './SegmentedControl'
+import { MonthFilter } from './MonthFilter'
 import { PropertyList } from './PropertyList'
 
 /**
@@ -9,8 +10,10 @@ import { PropertyList } from './PropertyList'
  * @param {boolean} props.loading - Whether the app is in loading state
  * @param {boolean} props.showSkeletons - Whether to show loading skeletons
  * @param {string} props.selectedSegment - Currently selected segment
+ * @param {string} props.selectedMonth - Currently selected month filter
  * @param {Function} props.onSelect - Function to call when a property is selected
  * @param {Function} props.onSegmentChange - Function to call when segment changes
+ * @param {Function} props.onMonthChange - Function to call when month filter changes
  * @returns {JSX.Element}
  */
 export const Sidebar = ({ 
@@ -19,14 +22,21 @@ export const Sidebar = ({
   loading, 
   showSkeletons, 
   selectedSegment, 
+  selectedMonth,
   onSelect, 
-  onSegmentChange 
+  onSegmentChange,
+  onMonthChange
 }) => {
   return (
     <div className="sidebar">
       <SegmentedControl 
         selectedSegment={selectedSegment}
         onSegmentChange={onSegmentChange}
+      />
+      
+      <MonthFilter 
+        selectedMonth={selectedMonth}
+        onMonthChange={onMonthChange}
       />
       
       <div className="sidebar-list">

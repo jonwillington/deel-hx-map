@@ -72,8 +72,10 @@ export const PremiumCard = ({ location, onClose, isClosing, segment, rowIndex = 
             }}
           />
         ) : null}
-        <div className="premium-card-placeholder" style={{ display: imageUrl ? 'none' : 'block' }}>
-          {imageError ? 'Error loading image' : 'No Image'}
+        <div className="premium-card-placeholder" style={{ display: imageUrl ? 'none' : 'flex' }}>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="#e0e0e0">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          </svg>
         </div>
         <div className="premium-card-image-overlay">
           <h3 className="premium-card-title-overlay">{location.City || ''}</h3>
@@ -85,19 +87,15 @@ export const PremiumCard = ({ location, onClose, isClosing, segment, rowIndex = 
         </button>
       </div>
 
-      {/* Fixed content section */}
-      <div className="premium-card-fixed-content">
-        {/* Notes as prominent body text - moved above cells */}
-        {location['Any notes'] && (
-          <div className="premium-card-notes">
-            <p>{location['Any notes']}</p>
-          </div>
-        )}
-      </div>
-
       {/* Scrollable cells section */}
       <div className="premium-card-scrollable" ref={scrollableRef}>
         <div className="premium-card-cells">
+          {/* Notes as prominent body text - moved to scrollable area */}
+          {location['Any notes'] && (
+            <div className="premium-card-notes">
+              <p>{location['Any notes']}</p>
+            </div>
+          )}
           <div className="premium-card-cell">
             <div className="premium-card-cell-label">Country</div>
             <div className="premium-card-cell-value">
@@ -224,6 +222,9 @@ export const PremiumCard = ({ location, onClose, isClosing, segment, rowIndex = 
                     </svg>
                   </button>
                   <div className="modal-body">
+                    <div className="interest-modal-illustration">
+                      <img src="/img/message-sent.svg" alt="Message sent illustration" />
+                    </div>
                     <h3>Great!</h3>
                     <p>Please give <strong>{location.Name || 'them'}</strong> a message on Slack!</p>
                   </div>

@@ -16,25 +16,60 @@ export const PropertyCard = ({ row, itemIndex, isActive, loading, onClick, style
   const { imageUrl, loading: imageLoading } = useImageUrl(row, itemIndex, segment)
   const getDisplayText = () => {
     if (row.Status && row.Status.toUpperCase() === 'ASK') {
-      return 'Contact for availability'
+      return (
+        <span>Contact for availability</span>
+      )
     }
     
-    // Build the display string: duration • size
+    // Build the display with icons
     const parts = []
     
-    // Add duration part
-    const duration = row['Duration '] || row.Duration || row.duration || ''
-    if (duration && duration.trim()) {
-      parts.push(duration.trim())
-    }
-    
-    // Add size part
+    // Add size part with bed icon (first)
     const size = row.Size || row.size || ''
     if (size && size.trim()) {
-      parts.push(size.trim())
+      parts.push(
+        <span key="size" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6d6d70" strokeWidth="1.5">
+            <path d="M2 4v16"/>
+            <path d="M2 8h18a2 2 0 0 1 2 2v10"/>
+            <path d="M2 17h20"/>
+            <path d="M6 8v9"/>
+          </svg>
+          {size.trim()}
+        </span>
+      )
     }
     
-    return parts.length > 0 ? parts.join(' • ') : 'Available'
+    // Add duration part with calendar icon (second)
+    const duration = row['Duration '] || row.Duration || row.duration || ''
+    if (duration && duration.trim()) {
+      parts.push(
+        <span key="duration" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6d6d70" strokeWidth="1.5">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+            <line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/>
+            <line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          {duration.trim()}
+        </span>
+      )
+    }
+    
+    if (parts.length === 0) {
+      return <span>Available</span>
+    }
+    
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        {parts.map((part, index) => [
+          part,
+          index < parts.length - 1 && (
+            <span key={`bullet-${index}`} style={{ color: '#6d6d70', fontSize: '12px' }}>•</span>
+          )
+        ]).flat().filter(Boolean)}
+      </div>
+    )
   }
 
   return (
@@ -44,8 +79,8 @@ export const PropertyCard = ({ row, itemIndex, isActive, loading, onClick, style
       style={style}
     >
                 <div className="small-card-content">
-            {imageUrl ? (
-              <div className="small-card-photo">
+            <div className="small-card-photo">
+              {imageUrl ? (
                 <img 
                   src={imageUrl} 
                   alt="Property" 
@@ -53,12 +88,18 @@ export const PropertyCard = ({ row, itemIndex, isActive, loading, onClick, style
                   onError={(e) => {
                     console.error('PropertyCard image failed to load:', e.target.src.substring(0, 100) + '...')
                     e.target.style.display = 'none'
+                    e.target.nextSibling.style.display = 'flex'
                   }}
                 />
+              ) : null}
+              <div className="small-card-placeholder" style={{ display: imageUrl ? 'none' : 'flex' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="#e0e0e0">
+                  <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                </svg>
               </div>
-            ) : null}
+            </div>
         <div className="small-card-details">
-          <div className="small-card-location" style={{ fontSize: '18px', fontWeight: '500', marginBottom: '2px', letterSpacing: '-0.3px', fontFamily: 'Bagoss Standard, sans-serif' }}>
+          <div className="small-card-location" style={{ fontSize: '18px', fontWeight: '500', marginBottom: '4px', letterSpacing: '-0.3px', fontFamily: 'Bagoss Standard, sans-serif' }}>
             <Flag country={row.Country} className="flag-inline" /> {row.City || ''}
           </div>
           <div className="small-card-dates" style={{ fontSize: '14px', color: '#6d6d70', marginBottom: '6px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
