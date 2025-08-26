@@ -80,7 +80,7 @@ export const Sidebar = ({
             <div className="empty-caption">
               {selectedSegment === 'exchanges' || selectedSegment === 'exchange'
                 ? 'Please check back again soon. Are you interested in listing your place? Add your location and preferred dates to the sheet.'
-                : 'Please check back again soon'
+                : 'Please check back again soon. Are you planning on going away? Add your place to sheet!'
               }
             </div>
           </div>

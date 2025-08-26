@@ -150,7 +150,7 @@ export const PremiumCard = ({ location, onClose, isClosing, segment, rowIndex = 
           <div className="premium-card-cell">
             <div className="premium-card-cell-label">Pet friendly?</div>
             <div className="premium-card-cell-value">
-              {location.Pets ? 
+              {(location.Pets || location['Pets allowed']) === 'TRUE' || (location.Pets || location['Pets allowed']) === true ? 
                 <span className="premium-card-toggle premium-card-toggle-yes">Yes</span> : 
                 <span className="premium-card-toggle premium-card-toggle-no">Not currently</span>
               }
@@ -196,7 +196,7 @@ export const PremiumCard = ({ location, onClose, isClosing, segment, rowIndex = 
                       <img src="/img/message-sent.svg" alt="Message sent illustration" />
                     </div>
                     <h3>Great!</h3>
-                    <p>Please give <strong>{location.Name || 'them'}</strong> a message on Slack!</p>
+                    <p>Please give <strong>{location.Name || 'them'}</strong> a message!</p>
                   </div>
                 </div>
               </div>

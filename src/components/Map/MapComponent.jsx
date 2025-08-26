@@ -33,8 +33,8 @@ export const MapComponent = ({ locations, onLocationSelect, loading, error, mapR
           <div className="spinner-small-dark"></div>
           <span>
             {segment === 'exchange' || segment === 'exchanges' 
-              ? 'Checking for latest exchanges…' 
-              : 'Checking for latest sublets…'
+              ? 'Checking for the latest exchanges' 
+              : 'Checking for the latest sublets'
             }
           </span>
         </div>
