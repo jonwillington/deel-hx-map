@@ -849,8 +849,8 @@ body {
 /* Premium Card Styles */
 .premium-card {
   position: fixed;
-  right: 24px;
-  top: 24px;
+  right: 22px;
+  top: 22px;
   z-index: 2000;
   width: 380px;
   max-width: calc(100vw - 320px - 48px);
