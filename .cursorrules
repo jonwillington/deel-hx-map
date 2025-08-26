@@ -1,0 +1,140 @@
+# DHXC Housing Exchange Map - Cursor Rules
+
+## Project Overview
+This is a React application built with Vite for DHXC's housing exchange program. It features an interactive Mapbox map with property listings, authentication, and a modern UI.
+
+## Technology Stack
+- **Frontend**: React 19 with Vite
+- **Styling**: CSS with custom properties and modern layout techniques
+- **Maps**: Mapbox GL JS with clustering and geocoding
+- **Data**: Google Sheets integration via CSV export
+- **Icons**: Flag icons, custom SVG icons
+- **Authentication**: Simple password-based auth with localStorage
+
+## Project Structure
+```
+src/
+├── components/          # React components
+│   ├── Map/            # Mapbox integration
+│   ├── Sidebar/        # Property listing sidebar
+│   └── ...
+├── hooks/              # Custom React hooks
+├── utils/              # Utility functions
+└── App.jsx            # Main application component
+```
+
+## Key Conventions
+
+### React Components
+- Use functional components with hooks
+- Prefer `useState`, `useEffect`, `useCallback`, `useMemo`
+- Use proper TypeScript-like prop destructuring
+- Keep components focused and single-responsibility
+
+### Styling
+- Use CSS classes with BEM-like naming (e.g., `.premium-card`, `.premium-card-image`)
+- Leverage CSS custom properties for theming
+- Use modern CSS features: `backdrop-filter`, `calc()`, `flexbox`, `grid`
+- Mobile-first responsive design
+- Use `!important` sparingly, only when necessary for specificity
+
+### State Management
+- Use React hooks for local state
+- Custom hooks for reusable logic (e.g., `useMap`, `useLocations`)
+- Avoid prop drilling - use context if needed
+
+### File Naming
+- Components: PascalCase (e.g., `MapComponent.jsx`)
+- Hooks: camelCase with `use` prefix (e.g., `useMap.js`)
+- Utilities: camelCase (e.g., `mapboxUtils.js`)
+- CSS: kebab-case (e.g., `App.css`)
+
+## Specific Patterns
+
+### Mapbox Integration
+- Use `useMap` hook for map functionality
+- Implement marker clustering for performance
+- Handle geocoding with fallbacks
+- Use `easeTo` for smooth animations
+
+### Data Fetching
+- Use `useLocations` hook for Google Sheets data
+- Handle loading states and errors gracefully
+- Implement proper error boundaries
+
+### Authentication
+- Simple password-based auth stored in localStorage
+- Show loading states during auth checks
+- Redirect appropriately based on auth status
+
+### UI Components
+- Premium cards with backdrop blur effects
+- Floating sidebar with proper z-index management
+- Modal components with proper event handling
+- Responsive design with mobile considerations
+
+## Code Style Guidelines
+
+### JavaScript/JSX
+- Use ES6+ features (arrow functions, destructuring, template literals)
+- Prefer `const` over `let`, avoid `var`
+- Use meaningful variable names
+- Add JSDoc comments for complex functions
+- Handle async operations with proper error handling
+
+### CSS
+- Use semantic class names
+- Group related styles together
+- Use CSS custom properties for repeated values
+- Implement proper responsive breakpoints
+- Use modern CSS features appropriately
+
+### Performance
+- Implement proper React key props
+- Use `useCallback` and `useMemo` for expensive operations
+- Optimize map rendering with clustering
+- Lazy load components when appropriate
+
+## Common Patterns
+
+### Event Handling
+```javascript
+const handleClick = useCallback((event) => {
+  event.preventDefault()
+  // Handle click logic
+}, [dependencies])
+```
+
+### Conditional Rendering
+```jsx
+{isAuthenticated ? <MainApp /> : <PasswordPage />}
+```
+
+### Loading States
+```jsx
+{loading ? <LoadingSpinner /> : <Content />}
+```
+
+### Error Boundaries
+```jsx
+{error ? <ErrorMessage error={error} /> : <Content />}
+```
+
+## Dependencies to Consider
+- `mapbox-gl`: For map functionality
+- `papaparse`: For CSV parsing
+- `flag-icons`: For country flags
+- React hooks for state management
+
+## Development Workflow
+- Use Vite dev server for development
+- Hot module replacement enabled
+- Build with `npm run build`
+- Deploy static files from `dist/` directory
+
+## Notes
+- This is a Vite project, not Create React App
+- HTML template is in root `index.html`, not `public/index.html`
+- Use Vite's import.meta.env for environment variables
+- Static assets go in `public/` directory
+- CSS is imported directly in components
