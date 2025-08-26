@@ -49,6 +49,7 @@ export const Sidebar = ({
             selectedIndex={selectedIndex}
             loading={loading}
             selectedSegment={selectedSegment}
+            selectedMonth={selectedMonth}
             onSelect={onSelect}
           />
         )}

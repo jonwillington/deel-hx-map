@@ -14,10 +14,13 @@ export const useFilteredLocations = (locations, selectedSegment, selectedMonth =
     console.log('useFilteredLocations: Processing locations:', locations?.length, 'selectedSegment:', selectedSegment, 'selectedMonth:', selectedMonth)
     if (!locations || locations.length === 0) return []
     
-    // Apply month filtering
-    const monthFiltered = filterLocationsByMonth(locations, selectedMonth)
-    console.log('useFilteredLocations: After month filtering:', monthFiltered.length, 'from', locations.length)
+    // Locations are already pre-segmented by data source (sublets sheet vs exchanges sheet)
+    // No need to filter by segment since the correct data is already loaded
     
-    return monthFiltered
+    // Apply month filtering to both sublets and exchanges when a month is selected
+    const finalFiltered = filterLocationsByMonth(locations, selectedMonth)
+    console.log('useFilteredLocations: After month filtering:', finalFiltered.length, 'from', locations.length)
+    
+    return finalFiltered
   }, [locations, selectedSegment, selectedMonth])
 }

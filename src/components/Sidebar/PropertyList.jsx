@@ -9,10 +9,11 @@ import { PropertyCard } from './PropertyCard'
  * @param {number} props.selectedIndex - Currently selected property index
  * @param {boolean} props.loading - Whether the app is in loading state
  * @param {string} props.selectedSegment - Current segment ('sublets' or 'exchanges')
+ * @param {string} props.selectedMonth - Currently selected month filter ('all' or YYYY-MM format)
  * @param {Function} props.onSelect - Function to call when a property is selected
  * @returns {JSX.Element}
  */
-export const PropertyList = ({ filteredLocations, selectedIndex, loading, selectedSegment, onSelect }) => {
+export const PropertyList = ({ filteredLocations, selectedIndex, loading, selectedSegment, selectedMonth, onSelect }) => {
   const elements = []
   let staggerIndex = 0
   
@@ -59,7 +60,7 @@ export const PropertyList = ({ filteredLocations, selectedIndex, loading, select
     months.forEach(month => {
       // Add month header
       elements.push(
-        <MonthSeparator key={`month-${month}`} month={month} />
+        <MonthSeparator key={`month-${month}`} month={month} selectedMonth={selectedMonth} />
       )
       
       // Add properties for this month

@@ -1,3 +1,47 @@
+/* Fade In Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Spinner Fade In Animation */
+@keyframes spinnerFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Fade Out Animation */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/* Spinner Fade Out Animation */
+@keyframes spinnerFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 /* Bagoss Standard Font Family */
 @font-face {
   font-family: 'Bagoss Standard';
@@ -224,7 +268,6 @@ body {
   z-index: 1000;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 16px;
   display: flex;
   flex-direction: column;
@@ -650,6 +693,7 @@ body {
   text-align: left;
   background: white;
   border: none;
+  border-left: 3px solid white;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   border-radius: 0;
   padding: 16px 20px;
@@ -672,6 +716,7 @@ body {
 
 .small-card.active {
   background: rgba(27, 27, 27, 0.05);
+  border-left: 3px solid black;
 }
 
 .small-card-content {
@@ -715,22 +760,16 @@ body {
 
 .small-card:focus {
   outline: none;
-  border: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: none;
 }
 
 .small-card:focus-visible {
   outline: none;
-  border: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: none;
 }
 
 .small-card:active {
   outline: none;
-  border: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: none;
 }
 
@@ -740,9 +779,14 @@ body {
 .small-card:focus,
 .small-card:focus-visible,
 .small-card:active {
-  border-color: transparent !important;
+  border: none !important;
+  border-left: 3px solid white !important;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
   outline-color: transparent !important;
+}
+
+.small-card.active {
+  border-left: 3px solid black !important;
 }
 
 .small-card-header {
@@ -1129,8 +1173,8 @@ body {
 }
 
 .spinner-small-dark {
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-top: 2px solid rgb(196, 177, 249);
   border-radius: 50%;

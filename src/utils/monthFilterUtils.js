@@ -9,6 +9,7 @@ import { parseDate } from './dateUtils'
 export const propertyOverlapsMonth = (row, targetMonthKey) => {
   if (!targetMonthKey || targetMonthKey === 'all') return true
   
+  
   // Get target month start and end dates
   const [year, month] = targetMonthKey.split('-').map(Number)
   const targetMonthStart = new Date(year, month - 1, 1)
@@ -38,6 +39,9 @@ export const propertyOverlapsMonth = (row, targetMonthKey) => {
     } else if (durationText.includes('year')) {
       const years = parseFloat(durationText) || 1
       durationMonths = years * 12
+    } else if (durationText.includes('night')) {
+      const nights = parseFloat(durationText) || 1
+      durationMonths = nights / 30.44 // Convert nights to months
     } else if (durationText.includes('day')) {
       const days = parseFloat(durationText) || 30
       durationMonths = days / 30.44 // Approximate days to months
@@ -51,6 +55,7 @@ export const propertyOverlapsMonth = (row, targetMonthKey) => {
     endDate = new Date(startDate)
     endDate.setMonth(endDate.getMonth() + 1)
   }
+  
   
   // Check if property period overlaps with target month
   // Property overlaps if: start <= targetMonthEnd AND end >= targetMonthStart

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 /**
  * Map component for displaying the interactive map
@@ -12,25 +12,46 @@ import { useState } from 'react'
  * @returns {JSX.Element}
  */
 export const MapComponent = ({ locations, onLocationSelect, loading, error, mapRef, segment, showCreateModal, setShowCreateModal, refreshMarkers }) => {
+  const [isFadingOut, setIsFadingOut] = useState(false)
+  const [showLoading, setShowLoading] = useState(false)
+
+  useEffect(() => {
+    if (loading) {
+      setIsFadingOut(false)
+      setShowLoading(true)
+    } else if (showLoading) {
+      setIsFadingOut(true)
+      const timer = setTimeout(() => {
+        setShowLoading(false)
+        setIsFadingOut(false)
+      }, 300) // Match animation duration
+      return () => clearTimeout(timer)
+    }
+  }, [loading, showLoading])
 
   return (
     <div className="map-area">
-      {loading && (
+      {showLoading && (
         <div style={{ 
           position: 'absolute', 
           zIndex: 2, 
           left: '380px', 
-          top: '20px', 
-          padding: '12px 16px', 
+          top: '37px', 
+          height: '34px',
+          padding: '0 16px', 
           background: '#1a0d3f', 
-          borderRadius: 6, 
+          borderRadius: 8, 
           boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
-          color: 'white'
+          color: 'white',
+          fontSize: '15px',
+          animation: isFadingOut ? 'fadeOut 0.3s ease-in-out' : 'fadeIn 0.3s ease-in-out'
         }}>
-          <div className="spinner-small-dark"></div>
+          <div style={{ animation: isFadingOut ? 'spinnerFadeOut 0.3s ease-in-out' : 'spinnerFadeIn 0.3s ease-in-out 0.1s both' }}>
+            <div className="spinner-small-dark"></div>
+          </div>
           <span>
             {segment === 'exchange' || segment === 'exchanges' 
               ? 'Checking for the latest exchanges' 
