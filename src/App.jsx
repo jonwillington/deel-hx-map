@@ -52,7 +52,7 @@ function App() {
   }
 
   // Map hook - must be after handleSelect is defined
-  const { mapContainerRef, handleLocationSelect, refreshMarkers } = useMap(filteredLocations, handleSelect, loading)
+  const { mapContainerRef, handleLocationSelect, refreshMarkers } = useMap(filteredLocations, handleSelect, loading, isAuthenticated)
 
   // Handle segment change
   const handleSegmentChange = (segment) => {
@@ -89,6 +89,18 @@ function App() {
       setPasswordError(result.error)
     }
   }
+
+  // Force marker refresh after authentication to ensure they appear
+  useEffect(() => {
+    if (isAuthenticated && !loading && filteredLocations.length > 0) {
+      // Small delay to ensure map is fully initialized
+      const timer = setTimeout(() => {
+        console.log('App: Triggering marker refresh after authentication')
+        refreshMarkers()
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [isAuthenticated, loading, filteredLocations.length, refreshMarkers])
 
   // Show loading state while checking authentication
   if (isLoading) {

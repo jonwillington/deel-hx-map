@@ -11,7 +11,7 @@ mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1Ijoiam9uYXRo
  * @param {Function} onLocationSelect - Function to call when a location is selected
  * @returns {Object} Map state and functions
  */
-export const useMap = (locations, onLocationSelect, loading) => {
+export const useMap = (locations, onLocationSelect, loading, isAuthenticated = true) => {
   const mapContainerRef = useRef(null)
   const mapRef = useRef(null)
   const markersRef = useRef([])
@@ -89,11 +89,11 @@ export const useMap = (locations, onLocationSelect, loading) => {
 
   // Add markers when locations change and loading is complete
   useEffect(() => {
-    console.log('useMap: Locations changed, locations count:', locations.length, 'loading:', loading)
+    console.log('useMap: Locations changed, locations count:', locations.length, 'loading:', loading, 'authenticated:', isAuthenticated)
     console.log('useMap: First few locations:', locations.slice(0, 3).map(loc => ({ City: loc.City, Country: loc.Country })))
     
-    if (!mapRef.current || !locations.length || loading) {
-      console.log('useMap: No map ref, no locations, or still loading - skipping markers')
+    if (!mapRef.current || !locations.length || loading || !isAuthenticated) {
+      console.log('useMap: No map ref, no locations, still loading, or not authenticated - skipping markers')
       return
     }
     
