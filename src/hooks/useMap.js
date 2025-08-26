@@ -42,8 +42,8 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
       mapRef.current = new mapboxgl.Map({
         container: mapContainerRef.current,
         style: 'mapbox://styles/jonathanwillington/cm8ym2u5b003d01r431z7872k',
-        center: [30, 20],
-        zoom: 2,
+        center: [10, 50], // Centered over Europe
+        zoom: 3, // Less zoom
         interactive: true,
         attributionControl: false
       })
