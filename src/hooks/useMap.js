@@ -350,16 +350,24 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
   // Manual refresh function to force marker recreation
   const refreshMarkers = useCallback(() => {
     console.log('useMap: Manual marker refresh requested')
-    if (mapRef.current && locations.length && !loading) {
-      const addMarkers = async () => {
-        console.log('useMap: Clearing existing markers, count:', markersRef.current.length)
-        markersRef.current.forEach(marker => marker.remove())
-        markersRef.current = []
-        locationToMarkerMapRef.current.clear()
-        console.log('useMap: Markers cleared')
+    if (mapRef.current && locations.length && !loading && isAuthenticated) {
+      // Remove existing source and layers if they exist
+      if (mapRef.current.getSource('locations')) {
+        mapRef.current.removeLayer('clusters')
+        mapRef.current.removeLayer('cluster-count')
+        mapRef.current.removeLayer('unclustered-point')
+        mapRef.current.removeSource('locations')
+      }
 
-        for (const row of locations) {
-          console.log('useMap: Geocoding location:', row.City, row.Country, 'Full row:', row)
+      // Recreate markers using the same clustering approach
+      const addMarkers = async () => {
+        console.log('useMap: Recreating markers with clustering')
+        
+        // Collect all coordinates and create GeoJSON
+        const features = []
+        for (let i = 0; i < locations.length; i++) {
+          const row = locations[i]
+          console.log('useMap: Geocoding location:', row.City, row.Country)
           const coords = await geocode(row)
           if (!coords) {
             console.log('useMap: No coordinates found for:', row.City)
@@ -367,34 +375,129 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
           }
           console.log('useMap: Found coordinates:', coords, 'for:', row.City)
 
-          const marker = new mapboxgl.Marker({ color: '#ffdb5f' })
-            .setLngLat(coords)
-            .addTo(mapRef.current)
-
-          const markerElement = marker.getElement()
-          markerElement.style.cursor = 'pointer'
-          
-          const svg = markerElement.querySelector('svg')
-          const innerCircle = markerElement.querySelector('svg circle')
-          if (svg) svg.style.fill = '#ffdb5f'
-          if (innerCircle) innerCircle.style.fill = '#000'
-          
-          markerElement.addEventListener('click', () => {
-            const locationIndex = locations.findIndex(loc => loc === row)
-            if (locationIndex !== -1) {
-              console.log('useMap: Marker clicked for:', row.City, 'at index:', locationIndex)
-              onLocationSelect(locationIndex)
+          features.push({
+            type: 'Feature',
+            properties: {
+              id: i,
+              location: row
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: coords
             }
           })
-
-          markersRef.current.push(marker)
-          locationToMarkerMapRef.current.set(row, marker)
-          console.log('useMap: Added marker for:', row.City, 'at coords:', coords)
         }
+
+        // Add GeoJSON source with clustering
+        mapRef.current.addSource('locations', {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: features
+          },
+          cluster: true,
+          clusterMaxZoom: 14,
+          clusterRadius: 50
+        })
+
+        // Add cluster layer
+        mapRef.current.addLayer({
+          id: 'clusters',
+          type: 'circle',
+          source: 'locations',
+          filter: ['has', 'point_count'],
+          paint: {
+            'circle-color': '#ffdb5f',
+            'circle-radius': [
+              'step',
+              ['get', 'point_count'],
+              20, 100,
+              30, 750,
+              40
+            ]
+          }
+        })
+
+        // Add cluster count layer
+        mapRef.current.addLayer({
+          id: 'cluster-count',
+          type: 'symbol',
+          source: 'locations',
+          filter: ['has', 'point_count'],
+          layout: {
+            'text-field': '{point_count_abbreviated}',
+            'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+            'text-size': 12
+          },
+          paint: {
+            'text-color': '#000'
+          }
+        })
+
+        // Add unclustered point layer
+        mapRef.current.addLayer({
+          id: 'unclustered-point',
+          type: 'circle',
+          source: 'locations',
+          filter: ['!', ['has', 'point_count']],
+          paint: {
+            'circle-color': '#ffdb5f',
+            'circle-radius': 8,
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#000'
+          }
+        })
+
+        // Add click handlers
+        mapRef.current.on('click', 'clusters', (e) => {
+          const features = mapRef.current.queryRenderedFeatures(e.point, {
+            layers: ['clusters']
+          })
+          const clusterId = features[0].properties.cluster_id
+          mapRef.current.getSource('locations').getClusterExpansionZoom(
+            clusterId,
+            (err, zoom) => {
+              if (err) return
+
+              mapRef.current.easeTo({
+                center: features[0].geometry.coordinates,
+                zoom: zoom
+              })
+            }
+          )
+        })
+
+        mapRef.current.on('click', 'unclustered-point', (e) => {
+          const features = mapRef.current.queryRenderedFeatures(e.point, {
+            layers: ['unclustered-point']
+          })
+          if (features.length > 0) {
+            const locationIndex = features[0].properties.id
+            console.log('useMap: Marker clicked for:', locations[locationIndex].City, 'at index:', locationIndex)
+            onLocationSelect(locationIndex)
+          }
+        })
+
+        // Change cursor on hover
+        mapRef.current.on('mouseenter', 'clusters', () => {
+          mapRef.current.getCanvas().style.cursor = 'pointer'
+        })
+        mapRef.current.on('mouseleave', 'clusters', () => {
+          mapRef.current.getCanvas().style.cursor = ''
+        })
+
+        mapRef.current.on('mouseenter', 'unclustered-point', () => {
+          mapRef.current.getCanvas().style.cursor = 'pointer'
+        })
+        mapRef.current.on('mouseleave', 'unclustered-point', () => {
+          mapRef.current.getCanvas().style.cursor = ''
+        })
+
+        console.log('useMap: Markers recreated successfully')
       }
       addMarkers()
     }
-  }, [locations, loading, onLocationSelect])
+  }, [locations, loading, onLocationSelect, isAuthenticated])
 
   return {
     mapContainerRef,
