@@ -728,7 +728,7 @@ body {
 
 .small-card-photo {
   flex-shrink: 0;
-  width: 90px;
+  width: 70px;
   height: 60px;
   border-radius: 8px;
   overflow: hidden;
@@ -757,6 +757,7 @@ body {
 .small-card-details {
   flex: 1;
   min-width: 0;
+  overflow: hidden;
 }
 
 .small-card:focus {
@@ -1467,7 +1468,7 @@ body {
 
 /* Skeleton Loading Styles */
 .skeleton-card {
-  width: 100%;
+  width: 277px;
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -1480,13 +1481,14 @@ body {
 
 .skeleton-card-content {
   display: flex;
+  flex-direction: row-reverse;
   gap: 12px;
   align-items: flex-start;
 }
 
 .skeleton-photo {
   flex-shrink: 0;
-  width: 60px;
+  width: 70px;
   height: 60px;
   border-radius: 8px;
   background: rgba(200, 200, 200, 0.3);
@@ -1502,7 +1504,7 @@ body {
   background: rgba(200, 200, 200, 0.3);
   border-radius: 4px;
   margin-bottom: 2px;
-  width: 70%;
+  width: 50%;
 }
 
 .skeleton-dates {

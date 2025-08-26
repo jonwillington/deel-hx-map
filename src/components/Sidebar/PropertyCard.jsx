@@ -99,10 +99,10 @@ export const PropertyCard = ({ row, itemIndex, isActive, loading, onClick, style
               </div>
             </div>
         <div className="small-card-details">
-          <div className="small-card-location" style={{ fontSize: '18px', fontWeight: '500', marginBottom: '4px', letterSpacing: '-0.3px', fontFamily: 'Bagoss Standard, sans-serif' }}>
+          <div className="small-card-location" style={{ fontSize: '18px', fontWeight: '500', marginBottom: '4px', letterSpacing: '-0.3px', fontFamily: 'Bagoss Standard, sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '277px' }}>
             <Flag country={row.Country} className="flag-inline" /> {row.City || ''}
           </div>
-          <div className="small-card-dates" style={{ fontSize: '14px', color: '#6d6d70', marginBottom: '6px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
+          <div className="small-card-dates" style={{ fontSize: '14px', color: '#6d6d70', marginBottom: '6px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '277px' }}>
             {getDisplayText()}
           </div>
         </div>
