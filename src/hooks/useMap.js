@@ -17,6 +17,7 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
   const markersRef = useRef([])
   const locationToMarkerMapRef = useRef(new Map()) // Map location identity to marker
   const pendingSelectIndexRef = useRef(null)
+  const isAnimatingRef = useRef(false) // Track if we're currently animating
 
   // Initialize map
   useEffect(() => {
@@ -44,15 +45,7 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
         center: [30, 20],
         zoom: 2,
         interactive: true,
-        dragPan: { deceleration: 0.98, maxSpeed: 800 },
-        scrollZoom: { speed: 0.2, smooth: true, maxZoom: 18, minZoom: 1 },
-        boxZoom: false,
-        doubleClickZoom: false,
-        keyboard: false,
-        attributionControl: false,
-        maxBounds: [[-180, -85], [180, 85]], // Prevent going beyond reasonable bounds
-        maxZoom: 18,
-        minZoom: 1
+        attributionControl: false
       })
 
       console.log('useMap:init instance created, waiting for load...')
@@ -71,10 +64,11 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
       })
       
       mapRef.current.on('movestart', () => {
-        try { console.log('useMap:event movestart', mapRef.current.getCenter().toArray()) } catch {}
+        console.log('useMap:event movestart', mapRef.current.getCenter().toArray()) 
       })
+      
       mapRef.current.on('moveend', () => {
-        try { console.log('useMap:event moveend', mapRef.current.getCenter().toArray()) } catch {}
+        console.log('useMap:event moveend', mapRef.current.getCenter().toArray()) 
       })
     }
     initMap()
@@ -89,16 +83,17 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
 
   // Add markers when locations change and loading is complete
   useEffect(() => {
-    console.log('useMap: Locations changed, locations count:', locations.length, 'loading:', loading, 'authenticated:', isAuthenticated)
-    console.log('useMap: First few locations:', locations.slice(0, 3).map(loc => ({ City: loc.City, Country: loc.Country })))
+    console.log('🔄 MARKERS USEEFFECT TRIGGERED')
+    console.log('🔄 Locations count:', locations.length, 'loading:', loading, 'authenticated:', isAuthenticated)
+    console.log('🔄 Map ref exists:', !!mapRef.current)
+    console.log('🔄 First few locations:', locations.slice(0, 3).map(loc => ({ City: loc.City, Country: loc.Country })))
     
     if (!mapRef.current || !locations.length || loading || !isAuthenticated) {
-      console.log('useMap: No map ref, no locations, still loading, or not authenticated - skipping markers')
+      console.log('🔄 SKIPPING MARKERS - missing requirements')
       return
     }
     
-    // Force marker recreation to apply new geocoding logic
-    console.log('useMap: Force recreating markers to apply updated geocoding logic')
+    console.log('🔄 PROCEEDING WITH MARKER RECREATION')
 
     const addMarkers = async () => {
       console.log('useMap: Clearing existing markers, count:', markersRef.current.length)
@@ -110,10 +105,26 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
 
       // Remove existing source and layers if they exist
       if (mapRef.current.getSource('locations')) {
+        console.log('🧹 CLEANING UP - removing existing layers and listeners')
+        
+        // Remove event listeners first
+        mapRef.current.off('click', 'clusters')
+        mapRef.current.off('click', 'unclustered-point')
+        mapRef.current.off('click') // Remove general click handler too
+        mapRef.current.off('mouseenter', 'clusters')
+        mapRef.current.off('mouseleave', 'clusters')
+        mapRef.current.off('mouseenter', 'unclustered-point')
+        mapRef.current.off('mouseleave', 'unclustered-point')
+        console.log('🧹 Event listeners removed')
+        
+        // Then remove layers and source
         mapRef.current.removeLayer('clusters')
         mapRef.current.removeLayer('cluster-count')
         mapRef.current.removeLayer('unclustered-point')
         mapRef.current.removeSource('locations')
+        console.log('🧹 Layers and source removed')
+      } else {
+        console.log('🧹 NO CLEANUP NEEDED - no existing source')
       }
 
       // Collect all coordinates and create GeoJSON
@@ -201,6 +212,10 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
           'circle-stroke-color': '#000'
         }
       })
+      
+      console.log('🎯 unclustered-point layer added with features:', features.length)
+      console.log('🎯 Layer visibility:', mapRef.current.getLayoutProperty('unclustered-point', 'visibility'))
+      console.log('🎯 Layer paint properties:', mapRef.current.getPaintProperty('unclustered-point', 'circle-radius'))
 
       // Add click handlers
       mapRef.current.on('click', 'clusters', (e) => {
@@ -221,16 +236,6 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
         )
       })
 
-      mapRef.current.on('click', 'unclustered-point', (e) => {
-        const features = mapRef.current.queryRenderedFeatures(e.point, {
-          layers: ['unclustered-point']
-        })
-        if (features.length > 0) {
-          const locationIndex = features[0].properties.id
-          console.log('useMap: Marker clicked for:', locations[locationIndex].City, 'at index:', locationIndex)
-          onLocationSelect(locationIndex)
-        }
-      })
 
       // Change cursor on hover
       mapRef.current.on('mouseenter', 'clusters', () => {
@@ -265,6 +270,7 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
     console.log('handleLocationSelect: Called with index:', index)
     console.log('handleLocationSelect: Total locations:', locations.length)
     console.log('handleLocationSelect: Map ref exists:', !!mapRef.current)
+    console.log('handleLocationSelect: Currently animating (before reset):', isAnimatingRef.current)
     
     if (!mapRef.current) {
       console.log('handleLocationSelect: No map ref, returning')
@@ -275,6 +281,10 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
       console.log('handleLocationSelect: Invalid index:', index, 'locations length:', locations.length)
       return
     }
+
+    // Force reset animation flag
+    isAnimatingRef.current = false
+    console.log('handleLocationSelect: Animation flag reset to:', isAnimatingRef.current)
 
     const location = locations[index]
     console.log('handleLocationSelect: Selected location:', location)
@@ -296,54 +306,20 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
     }
     
     const coords = feature.geometry.coordinates
-    const currentCenter = mapRef.current.getCenter()
     
-    // Validate coordinates
-    if (!isFinite(coords[0]) || !isFinite(coords[1]) || !isFinite(currentCenter.lng) || !isFinite(currentCenter.lat)) {
-      console.warn('useMap:select: invalid centers', { coords, currentCenter })
+    // Basic coordinate validation
+    if (!isFinite(coords[0]) || !isFinite(coords[1])) {
+      console.warn('useMap:select: invalid coordinates', coords)
       return
     }
     
-    // Clamp coordinates to valid ranges
-    const validLng = Math.max(-180, Math.min(180, coords[0]))
-    const validLat = Math.max(-85, Math.min(85, coords[1]))
-    const validCurrentLng = Math.max(-180, Math.min(180, currentCenter.lng))
-    const validCurrentLat = Math.max(-85, Math.min(85, currentCenter.lat))
+    console.log('useMap: Flying to coordinates:', coords)
     
-    if (validLng !== coords[0] || validLat !== coords[1]) {
-      console.warn('useMap:select: coordinates clamped', { original: coords, clamped: [validLng, validLat] })
-    }
-    
-    // Calculate the shortest rotation to make the marker visible
-    let targetLng = validLng
-    const lngDiff = targetLng - validCurrentLng
-    if (Math.abs(lngDiff) > 180) {
-      if (lngDiff > 0) {
-        targetLng = validLng - 360
-      } else {
-        targetLng = validLng + 360
-      }
-    }
-
-    // Calculate distance for duration scaling
-    const distance = Math.sqrt(
-      Math.pow(targetLng - validCurrentLng, 2) + 
-      Math.pow(validLat - validCurrentLat, 2)
-    )
-
-    // Faster, capped duration for selection animation
-    const baseDuration = 700
-    const distanceMultiplier = Math.min(distance * 800, 2)
-    const duration = Math.max(baseDuration, Math.min(baseDuration * distanceMultiplier, 1600))
-
-    // Animate to marker with world rotation
-    mapRef.current.easeTo({
-      center: [Number(targetLng), Number(validLat)],
-      zoom: 2,
-      duration,
-      easing: (t) => {
-        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t
-      }
+    // Animate to the location
+    mapRef.current.flyTo({
+      center: coords,
+      zoom: 6,
+      duration: 1000
     })
   }, [locations])
 
@@ -353,6 +329,15 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
     if (mapRef.current && locations.length && !loading && isAuthenticated) {
       // Remove existing source and layers if they exist
       if (mapRef.current.getSource('locations')) {
+        // Remove event handlers first
+        mapRef.current.off('click', 'clusters')
+        mapRef.current.off('click', 'unclustered-point')
+        mapRef.current.off('mouseenter', 'clusters')
+        mapRef.current.off('mouseleave', 'clusters')
+        mapRef.current.off('mouseenter', 'unclustered-point')
+        mapRef.current.off('mouseleave', 'unclustered-point')
+        
+        // Then remove layers and source
         mapRef.current.removeLayer('clusters')
         mapRef.current.removeLayer('cluster-count')
         mapRef.current.removeLayer('unclustered-point')
@@ -467,16 +452,55 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
           )
         })
 
+        // Add event listeners
+        console.log('🎯 ADDING EVENT LISTENERS')
+        
+        // Add general map click handler for debugging
+        mapRef.current.on('click', (e) => {
+          console.log('🗺️ MAP CLICKED (general) at:', e.point)
+          console.log('🗺️ Querying all layers at click point...')
+          const allFeatures = mapRef.current.queryRenderedFeatures(e.point)
+          console.log('🗺️ All features found:', allFeatures.length)
+          allFeatures.forEach((feature, i) => {
+            console.log(`🗺️ Feature ${i}:`, {
+              layerId: feature.layer?.id || 'no-layer',
+              sourceLayer: feature.sourceLayer || 'no-source-layer',
+              properties: feature.properties || 'no-properties'
+            })
+          })
+        })
+        console.log('🎯 General click handler added')
+        
         mapRef.current.on('click', 'unclustered-point', (e) => {
+          console.log('📍 PIN CLICKED - event fired')
+          console.log('📍 Event point:', e.point)
+          console.log('📍 Event timestamp:', Date.now())
+          
+          e.preventDefault()
+          e.originalEvent?.stopPropagation()
+          
           const features = mapRef.current.queryRenderedFeatures(e.point, {
             layers: ['unclustered-point']
           })
+          console.log('📍 Found features:', features.length)
+          
           if (features.length > 0) {
             const locationIndex = features[0].properties.id
-            console.log('useMap: Marker clicked for:', locations[locationIndex].City, 'at index:', locationIndex)
-            onLocationSelect(locationIndex)
+            console.log('📍 Location index:', locationIndex)
+            console.log('📍 Location name:', locations[locationIndex]?.City)
+            console.log('📍 CALLING onLocationSelect with index:', locationIndex)
+            onLocationSelect(locationIndex, 'pin')
+            console.log('📍 onLocationSelect call completed')
+            
+            // Also animate the map to the location
+            console.log('📍 Triggering map animation')
+            handleLocationSelect(locationIndex)
+          } else {
+            console.log('📍 No features found at click point')
           }
         })
+        console.log('🎯 Pin click handler added')
+        console.log('🎯 ALL EVENT LISTENERS ATTACHED')
 
         // Change cursor on hover
         mapRef.current.on('mouseenter', 'clusters', () => {

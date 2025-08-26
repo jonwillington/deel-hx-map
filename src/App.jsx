@@ -17,6 +17,12 @@ function App() {
   const { isAuthenticated, isLoading, authenticate, logout, toggleAuth } = useAuth()
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const [showPremiumCard, setShowPremiumCard] = useState(false)
+  
+  // Debug logging for selectedIndex changes
+  useEffect(() => {
+    console.log('🎯 selectedIndex changed to:', selectedIndex)
+    console.log('🎯 showPremiumCard:', showPremiumCard)
+  }, [selectedIndex, showPremiumCard])
   const [isClosingPremiumCard, setIsClosingPremiumCard] = useState(false)
   const [currentLocation, setCurrentLocation] = useState(null)
   const [selectedSegment, setSelectedSegment] = useState('sublets')
@@ -29,13 +35,19 @@ function App() {
   const filteredLocations = useFilteredLocations(locations, selectedSegment, selectedMonth)
   
   // Handle property selection
-  function handleSelect(index) {
-    // If clicking the already selected item, close the drawer
-    if (selectedIndex === index && showPremiumCard) {
+  function handleSelect(index, source = 'unknown') {
+    console.log('🔥 App.handleSelect called with index:', index, 'source:', source)
+    console.log('🔥 Current selectedIndex:', selectedIndex)
+    console.log('🔥 Current showPremiumCard:', showPremiumCard)
+    
+    // If clicking the same menu item (not pin), close the drawer
+    if (selectedIndex === index && showPremiumCard && source === 'menu') {
+      console.log('🔥 CLOSING DRAWER - same menu item clicked while drawer open')
       handlePremiumCardClose()
       return
     }
 
+    console.log('🔥 OPENING DRAWER - setting selectedIndex to:', index)
     setSelectedIndex(index)
     
     if (index >= 0 && index < filteredLocations.length) {
@@ -128,7 +140,7 @@ function App() {
           showSkeletons={showSkeletons}
           selectedSegment={selectedSegment}
           selectedMonth={selectedMonth}
-          onSelect={handleSelect}
+          onSelect={(index) => handleSelect(index, 'menu')}
           onSegmentChange={handleSegmentChange}
           onMonthChange={handleMonthChange}
         />
