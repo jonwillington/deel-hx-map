@@ -16,12 +16,91 @@ import { useImageUrl } from '../hooks/useImageUrl'
 export const PremiumCard = ({ location, onClose, isClosing, segment, rowIndex = null }) => {
   const [showModal, setShowModal] = useState(false)
   const [showScrollIndicator, setShowScrollIndicator] = useState(false)
+  const [expandedNotes, setExpandedNotes] = useState(new Set())
   const scrollableRef = useRef(null)
+  const notesRefs = useRef({})
   
   // Load image URL asynchronously
   const { imageUrl, loading: imageLoading, error: imageError } = useImageUrl(location, rowIndex, segment)
   
   if (!location) return null
+
+  // Create a unique key for this set of notes
+  const getNotesKey = (notes) => {
+    return `notes-${location.Name}-${location.City}-${notes?.substring(0, 50)?.replace(/\s/g, '')}`
+  }
+
+  // Check if text overflows 3 lines and get truncated version
+  const getTruncatedText = (notes, notesKey) => {
+    if (!notes) return { text: '', needsTruncation: false }
+    
+    if (expandedNotes.has(notesKey)) {
+      return { text: notes, needsTruncation: false }
+    }
+
+    // Create a temporary element to measure text height
+    const tempDiv = document.createElement('div')
+    tempDiv.style.position = 'absolute'
+    tempDiv.style.visibility = 'hidden'
+    tempDiv.style.width = '280px' // Approximate width of premium card content
+    tempDiv.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
+    tempDiv.style.fontSize = '16px'
+    tempDiv.style.lineHeight = '1.5'
+    tempDiv.style.padding = '0'
+    tempDiv.style.margin = '0'
+    tempDiv.innerHTML = notes
+    
+    document.body.appendChild(tempDiv)
+    const fullHeight = tempDiv.offsetHeight
+    
+    // Calculate approximate height of 3 lines (lineHeight * 3)
+    const lineHeight = parseFloat(window.getComputedStyle(tempDiv).lineHeight)
+    const threeLineHeight = lineHeight * 3
+    
+    document.body.removeChild(tempDiv)
+    
+    if (fullHeight <= threeLineHeight) {
+      return { text: notes, needsTruncation: false }
+    }
+
+    // Binary search to find the right amount of text for 3 lines
+    const words = notes.split(' ')
+    let left = 0
+    let right = words.length
+    let bestFit = words.join(' ')
+
+    while (left < right) {
+      const mid = Math.floor((left + right) / 2)
+      const testText = words.slice(0, mid).join(' ')
+      
+      const testDiv = document.createElement('div')
+      testDiv.style.position = 'absolute'
+      testDiv.style.visibility = 'hidden'
+      testDiv.style.width = '280px'
+      testDiv.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
+      testDiv.style.fontSize = '16px'
+      testDiv.style.lineHeight = '1.5'
+      testDiv.innerHTML = testText
+      
+      document.body.appendChild(testDiv)
+      const testHeight = testDiv.offsetHeight
+      document.body.removeChild(testDiv)
+      
+      if (testHeight <= threeLineHeight) {
+        bestFit = testText
+        left = mid + 1
+      } else {
+        right = mid
+      }
+    }
+
+    return { text: bestFit, needsTruncation: true }
+  }
+
+  // Reset expanded notes when modal reopens
+  useEffect(() => {
+    setExpandedNotes(new Set())
+  }, [location.Name, location.City]) // Reset when location changes (modal reopens with different or same location)
 
   // Handle scroll indicator and ensure trackpad scrolling works
   useEffect(() => {
@@ -92,11 +171,42 @@ export const PremiumCard = ({ location, onClose, isClosing, segment, rowIndex = 
       <div className="premium-card-scrollable" ref={scrollableRef}>
         <div className="premium-card-cells">
           {/* Notes as prominent body text - moved to scrollable area */}
-          {location['Any notes'] && (
-            <div className="premium-card-notes">
-              <p>{location['Any notes']}</p>
-            </div>
-          )}
+          {location['Any notes'] && (() => {
+            const notesKey = getNotesKey(location['Any notes'])
+            const { text, needsTruncation } = getTruncatedText(location['Any notes'], notesKey)
+            
+            return (
+              <div className="premium-card-notes">
+                <p>
+                  {text}
+                  {needsTruncation && (
+                    <>
+                      {' '}
+                      <button 
+                        onClick={() => {
+                          setExpandedNotes(prev => new Set([...prev, notesKey]))
+                        }}
+                        style={{ 
+                          background: 'none',
+                          border: 'none',
+                          color: 'rgb(34, 0, 140)',
+                          cursor: 'pointer',
+                          fontSize: 'inherit',
+                          fontWeight: '600',
+                          padding: '0px',
+                          textDecoration: 'none',
+                          display: 'inline',
+                          fontFamily: 'inherit'
+                        }}
+                      >
+                        ...Read more
+                      </button>
+                    </>
+                  )}
+                </p>
+              </div>
+            )
+          })()}
           <div className="premium-card-cell">
             <div className="premium-card-cell-label">Country</div>
             <div className="premium-card-cell-value">
@@ -129,6 +239,14 @@ export const PremiumCard = ({ location, onClose, isClosing, segment, rowIndex = 
                   )
                 }
               </div>
+            </div>
+          )}
+
+          {/* Duration cell */}
+          {(location['Duration '] || location.Duration || location.duration) && (
+            <div className="premium-card-cell">
+              <div className="premium-card-cell-label">Duration</div>
+              <div className="premium-card-cell-value">{location['Duration '] || location.Duration || location.duration}</div>
             </div>
           )}
 
@@ -196,7 +314,7 @@ export const PremiumCard = ({ location, onClose, isClosing, segment, rowIndex = 
                       <img src="/img/message-sent.svg" alt="Message sent illustration" />
                     </div>
                     <h3>Great!</h3>
-                    <p>Please give <strong>{location.Name || 'them'}</strong> a message!</p>
+                    <p>Please give <strong>{location.Name || 'them'}</strong><br />a message!</p>
                   </div>
                 </div>
               </div>

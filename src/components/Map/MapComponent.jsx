@@ -79,28 +79,6 @@ export const MapComponent = ({ locations, onLocationSelect, loading, error, mapR
 
       <div ref={mapRef} style={{ position: 'absolute', inset: 0 }} />
       
-      {/* Temporary Refresh Button for El Born Fix */}
-      {refreshMarkers && (
-        <button 
-          onClick={refreshMarkers}
-          style={{
-            position: 'absolute',
-            top: '20px',
-            right: '20px',
-            zIndex: 10,
-            padding: '8px 12px',
-            background: '#1a0d3f',
-            color: 'white',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '12px'
-          }}
-        >
-          Refresh Markers
-        </button>
-      )}
-      
       {/* Create Listing Button */}
       <button 
         onClick={() => setShowCreateModal(true)}

@@ -721,13 +721,14 @@ body {
 
 .small-card-content {
   display: flex;
+  flex-direction: row-reverse;
   gap: 16px;
   align-items: center;
 }
 
 .small-card-photo {
   flex-shrink: 0;
-  width: 60px;
+  width: 90px;
   height: 60px;
   border-radius: 8px;
   overflow: hidden;
