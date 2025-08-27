@@ -20,8 +20,15 @@ export function PasswordPage({ onPasswordSubmit, error: externalError }) {
   const displayError = externalError || error
 
   return (
-    <div className="password-page">
-      <div className="password-container">
+    <>
+      {/* Mobile message for screens < 600px */}
+      <div className="mobile-message">
+        <h2>Currently only supported on Desktop!</h2>
+        <p>Please visit this site on a desktop or laptop computer for the best experience.</p>
+      </div>
+
+      <div className="password-page">
+        <div className="password-container">
         <div className="password-form">
           <img src="/img/lock.svg" alt="Lock icon" className="password-lock-icon" />
           <h2>Got a password?</h2>
@@ -45,7 +52,8 @@ export function PasswordPage({ onPasswordSubmit, error: externalError }) {
             </button>
           </form>
         </div>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
