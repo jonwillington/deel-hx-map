@@ -98,7 +98,7 @@ export const geocode = async (row) => {
  * @returns {Promise<Array>} Coordinates [lng, lat] or null
  */
 async function geocodeQuery(query) {
-  const accessToken = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1Ijoiam9uYXRoYW53aWxsaW5ndG9uIiwiYSI6ImNsZ2Z5Z2Z5Z2Z5Z2Z5Z2Z5Z2Z5Z2Z5Z2Z5In0.example'
+  const accessToken = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1Ijoiam9ud2lsbGluZ3Rvbi1kZWVsIiwiYSI6ImNtZW50YTlpczE3OHYybXNlY2ZpMGt6eTYifQ.bWg-6-XReemxlvo6md_O0g'
   
   try {
     console.log('geocodeQuery: Making API request for:', query)

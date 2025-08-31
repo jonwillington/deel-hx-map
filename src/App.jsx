@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useLocations } from './hooks/useLocations'
 import { useFilteredLocations } from './hooks/useFilteredLocations'
 import { useMap } from './hooks/useMap'
+import { useMapWithQuery } from './hooks/useMapWithQuery'
+import { CacheMonitor } from './components/CacheMonitor'
 import { useAuth } from './hooks/useAuth'
 import { Sidebar } from './components/Sidebar/Sidebar'
 import { MapComponent } from './components/Map/MapComponent'
@@ -20,6 +22,17 @@ function App() {
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const [showPremiumCard, setShowPremiumCard] = useState(false)
   
+  // Enable React Query version for testing (can be toggled via environment or dev tools)
+  const useReactQuery = import.meta.env.DEV && true // Set to false to use original version
+  
+  // Log which version is being used
+  useEffect(() => {
+    console.log('🚀 Using', useReactQuery ? 'React Query (NEW)' : 'Original (OLD)', 'map implementation')
+    if (useReactQuery) {
+      console.log('💾 React Query cache monitoring enabled - watch console for cache hits/misses')
+    }
+  }, [useReactQuery])
+  
   // Debug logging for selectedIndex changes
   useEffect(() => {
     console.log('🎯 selectedIndex changed to:', selectedIndex)
@@ -36,8 +49,19 @@ function App() {
   const { locations, loading, error, showSkeletons } = useLocations(selectedSegment)
   const filteredLocations = useFilteredLocations(locations, selectedSegment, selectedMonth)
   
-  // Handle property selection
-  function handleSelect(index, source = 'unknown') {
+  // Handle premium card close with animation - memoized to prevent re-renders (defined early to avoid circular dependency)
+  const handlePremiumCardClose = useCallback(() => {
+    setIsClosingPremiumCard(true)
+    setTimeout(() => {
+      setShowPremiumCard(false)
+      setIsClosingPremiumCard(false)
+      setSelectedIndex(-1)
+      setCurrentLocation(null)
+    }, 300) // Match the animation duration
+  }, [])
+
+  // Handle property selection - memoized to prevent infinite render loops (defined before map hook to avoid circular dependency)
+  const handleSelect = useCallback((index, source = 'unknown') => {
     console.log('🔥 App.handleSelect called with index:', index, 'source:', source)
     console.log('🔥 Current selectedIndex:', selectedIndex)
     console.log('🔥 Current showPremiumCard:', showPremiumCard)
@@ -57,16 +81,28 @@ function App() {
       setCurrentLocation(location)
       setShowPremiumCard(true) // Always show detail sheet when item is selected
       
-      // Trigger map movement to the selected location
-      handleLocationSelect(index)
     } else {
       setShowPremiumCard(false)
       setCurrentLocation(null)
     }
-  }
+  }, [selectedIndex, showPremiumCard, filteredLocations.length, handlePremiumCardClose])
 
-  // Map hook - must be after handleSelect is defined
-  const { mapContainerRef, handleLocationSelect, refreshMarkers } = useMap(filteredLocations, handleSelect, loading, isAuthenticated)
+  // Map hook - conditionally use React Query version for testing
+  const mapResult = useReactQuery
+    ? useMapWithQuery(filteredLocations, handleSelect, loading, isAuthenticated)
+    : useMap(filteredLocations, handleSelect, loading, isAuthenticated)
+  
+  const { mapContainerRef, handleLocationSelect, refreshMarkers } = mapResult
+  
+  // Extract additional debugging info from React Query version
+  const { geocodingStats, cacheStats, featuresCount } = mapResult
+
+  // Handle map movement when selectedIndex changes (separate from handleSelect to avoid circular dependency)
+  useEffect(() => {
+    if (selectedIndex >= 0 && selectedIndex < filteredLocations.length && handleLocationSelect) {
+      handleLocationSelect(selectedIndex)
+    }
+  }, [selectedIndex, filteredLocations.length, handleLocationSelect])
 
   // Force marker refresh after authentication to ensure they appear
   useEffect(() => {
@@ -97,16 +133,6 @@ function App() {
     setCurrentLocation(null)
   }
 
-  // Handle premium card close with animation
-  const handlePremiumCardClose = () => {
-    setIsClosingPremiumCard(true)
-    setTimeout(() => {
-      setShowPremiumCard(false)
-      setIsClosingPremiumCard(false)
-      setSelectedIndex(-1)
-      setCurrentLocation(null)
-    }, 300) // Match the animation duration
-  }
 
   // Handle password submission
   const handlePasswordSubmit = (password) => {
@@ -171,6 +197,14 @@ function App() {
         
         {import.meta.env.DEV && (
           <DevTools onLogout={logout} onToggleAuth={toggleAuth} />
+        )}
+        
+        {/* Cache Monitor - only show in dev when using React Query */}
+        {import.meta.env.DEV && useReactQuery && (
+          <CacheMonitor 
+            geocodingStats={geocodingStats} 
+            show={true}
+          />
         )}
       </div>
 

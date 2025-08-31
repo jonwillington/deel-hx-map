@@ -4,7 +4,7 @@ import { geocode, calculateAnimationDuration } from '../utils/mapboxUtils'
 import { formatPopupDate } from '../utils/dateUtils'
 import { getMapColors } from '../utils/colorUtils'
 
-mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1Ijoiam9uYXRoYW53aWxsaW5ndG9uIiwiYSI6ImNsZ2Z5Z2Z5Z2Z5Z2Z5Z2Z5Z2Z5Z2Z5Z2Z5In0.example'
+mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1Ijoiam9ud2lsbGluZ3Rvbi1kZWVsIiwiYSI6ImNtZW50YTlpczE3OHYybXNlY2ZpMGt6eTYifQ.bWg-6-XReemxlvo6md_O0g'
 
 /**
  * Custom hook for managing map functionality
@@ -19,6 +19,7 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
   const locationToMarkerMapRef = useRef(new Map()) // Map location identity to marker
   const pendingSelectIndexRef = useRef(null)
   const isAnimatingRef = useRef(false) // Track if we're currently animating
+  const lastClickTimeRef = useRef(0) // Debounce rapid clicks
 
   // Initialize map
   useEffect(() => {
@@ -108,22 +109,33 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
       if (mapRef.current.getSource('locations')) {
         console.log('🧹 CLEANING UP - removing existing layers and listeners')
         
-        // Remove event listeners first
-        mapRef.current.off('click', 'clusters')
-        mapRef.current.off('click', 'unclustered-point')
-        mapRef.current.off('click') // Remove general click handler too
-        mapRef.current.off('mouseenter', 'clusters')
-        mapRef.current.off('mouseleave', 'clusters')
-        mapRef.current.off('mouseenter', 'unclustered-point')
-        mapRef.current.off('mouseleave', 'unclustered-point')
-        console.log('🧹 Event listeners removed')
+        // Remove event listeners first - be more specific about which handlers to remove
+        try {
+          if (mapRef.current.getLayer('clusters')) {
+            mapRef.current.off('click', 'clusters')
+            mapRef.current.off('mouseenter', 'clusters')
+            mapRef.current.off('mouseleave', 'clusters')
+          }
+          if (mapRef.current.getLayer('unclustered-point')) {
+            mapRef.current.off('click', 'unclustered-point')
+            mapRef.current.off('mouseenter', 'unclustered-point')
+            mapRef.current.off('mouseleave', 'unclustered-point')
+          }
+          console.log('🧹 Event listeners removed')
+        } catch (e) {
+          console.warn('🧹 Error removing event listeners:', e)
+        }
         
         // Then remove layers and source
-        mapRef.current.removeLayer('clusters')
-        mapRef.current.removeLayer('cluster-count')
-        mapRef.current.removeLayer('unclustered-point')
-        mapRef.current.removeSource('locations')
-        console.log('🧹 Layers and source removed')
+        try {
+          if (mapRef.current.getLayer('clusters')) mapRef.current.removeLayer('clusters')
+          if (mapRef.current.getLayer('cluster-count')) mapRef.current.removeLayer('cluster-count')
+          if (mapRef.current.getLayer('unclustered-point')) mapRef.current.removeLayer('unclustered-point')
+          mapRef.current.removeSource('locations')
+          console.log('🧹 Layers and source removed')
+        } catch (e) {
+          console.warn('🧹 Error removing layers/source:', e)
+        }
       } else {
         console.log('🧹 NO CLEANUP NEEDED - no existing source')
       }
@@ -192,8 +204,8 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
         filter: ['has', 'point_count'],
         layout: {
           'text-field': '{point_count_abbreviated}',
-          'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-          'text-size': 12
+          'text-font': ['Arial Unicode MS Bold'],
+          'text-size': 16
         },
         paint: {
           'text-color': '#000'
@@ -218,11 +230,17 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
       console.log('🎯 Layer visibility:', mapRef.current.getLayoutProperty('unclustered-point', 'visibility'))
       console.log('🎯 Layer paint properties:', mapRef.current.getPaintProperty('unclustered-point', 'circle-radius'))
 
-      // Add click handlers
+      // Add click handlers with debouncing
       mapRef.current.on('click', 'clusters', (e) => {
+        const now = Date.now()
+        if (now - lastClickTimeRef.current < 300) return // Debounce 300ms
+        lastClickTimeRef.current = now
+        
         const features = mapRef.current.queryRenderedFeatures(e.point, {
           layers: ['clusters']
         })
+        if (!features.length) return
+        
         const clusterId = features[0].properties.cluster_id
         mapRef.current.getSource('locations').getClusterExpansionZoom(
           clusterId,
@@ -316,10 +334,36 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
     
     console.log('useMap: Flying to coordinates:', coords)
     
-    // Animate to the location
+    // Smart zoom logic: maintain current zoom if already zoomed in, otherwise zoom to city level
+    const currentZoom = mapRef.current.getZoom()
+    const currentCenter = mapRef.current.getCenter()
+    
+    // Calculate distance between current center and target location
+    const distance = Math.sqrt(
+      Math.pow(currentCenter.lng - coords[0], 2) + 
+      Math.pow(currentCenter.lat - coords[1], 2)
+    )
+    
+    // If we're already zoomed in close (zoom > 8) and the distance is small (same city/area),
+    // maintain current zoom level. Otherwise, zoom to appropriate level.
+    let targetZoom
+    if (currentZoom > 8 && distance < 0.1) {
+      // Close zoom and nearby location - maintain current zoom
+      targetZoom = Math.max(currentZoom, 10) // Ensure minimum zoom of 10 for local navigation
+    } else if (distance < 0.5) {
+      // Same city/region but not close zoom - use city level
+      targetZoom = 10
+    } else {
+      // Different city/region - use country/region level
+      targetZoom = 6
+    }
+    
+    console.log('useMap: Smart zoom - current:', currentZoom, 'target:', targetZoom, 'distance:', distance)
+    
+    // Animate to the location with smart zoom
     mapRef.current.flyTo({
       center: coords,
-      zoom: 6,
+      zoom: targetZoom,
       duration: 1000
     })
   }, [locations])
@@ -330,19 +374,31 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
     if (mapRef.current && locations.length && !loading && isAuthenticated) {
       // Remove existing source and layers if they exist
       if (mapRef.current.getSource('locations')) {
-        // Remove event handlers first
-        mapRef.current.off('click', 'clusters')
-        mapRef.current.off('click', 'unclustered-point')
-        mapRef.current.off('mouseenter', 'clusters')
-        mapRef.current.off('mouseleave', 'clusters')
-        mapRef.current.off('mouseenter', 'unclustered-point')
-        mapRef.current.off('mouseleave', 'unclustered-point')
+        // Remove event handlers first - be more specific
+        try {
+          if (mapRef.current.getLayer('clusters')) {
+            mapRef.current.off('click', 'clusters')
+            mapRef.current.off('mouseenter', 'clusters')
+            mapRef.current.off('mouseleave', 'clusters')
+          }
+          if (mapRef.current.getLayer('unclustered-point')) {
+            mapRef.current.off('click', 'unclustered-point')
+            mapRef.current.off('mouseenter', 'unclustered-point')
+            mapRef.current.off('mouseleave', 'unclustered-point')
+          }
+        } catch (e) {
+          console.warn('Error removing event listeners in refreshMarkers:', e)
+        }
         
         // Then remove layers and source
-        mapRef.current.removeLayer('clusters')
-        mapRef.current.removeLayer('cluster-count')
-        mapRef.current.removeLayer('unclustered-point')
-        mapRef.current.removeSource('locations')
+        try {
+          if (mapRef.current.getLayer('clusters')) mapRef.current.removeLayer('clusters')
+          if (mapRef.current.getLayer('cluster-count')) mapRef.current.removeLayer('cluster-count')
+          if (mapRef.current.getLayer('unclustered-point')) mapRef.current.removeLayer('unclustered-point')
+          mapRef.current.removeSource('locations')
+        } catch (e) {
+          console.warn('Error removing layers/source in refreshMarkers:', e)
+        }
       }
 
       // Recreate markers using the same clustering approach
@@ -412,8 +468,8 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
           filter: ['has', 'point_count'],
           layout: {
             'text-field': '{point_count_abbreviated}',
-            'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-            'text-size': 12
+            'text-font': ['Arial Unicode MS Bold'],
+            'text-size': 16
           },
           paint: {
             'text-color': '#000'
@@ -434,11 +490,17 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
           }
         })
 
-        // Add click handlers
+        // Add click handlers with debouncing
         mapRef.current.on('click', 'clusters', (e) => {
+          const now = Date.now()
+          if (now - lastClickTimeRef.current < 300) return // Debounce 300ms
+          lastClickTimeRef.current = now
+          
           const features = mapRef.current.queryRenderedFeatures(e.point, {
             layers: ['clusters']
           })
+          if (!features.length) return
+          
           const clusterId = features[0].properties.cluster_id
           mapRef.current.getSource('locations').getClusterExpansionZoom(
             clusterId,
@@ -493,8 +555,8 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
             onLocationSelect(locationIndex, 'pin')
             console.log('📍 onLocationSelect call completed')
             
-            // Also animate the map to the location
-            console.log('📍 Triggering map animation')
+            // Also animate the map to the location (pin clicks should use smart zoom too)
+            console.log('📍 Triggering map animation for pin click')
             handleLocationSelect(locationIndex)
           } else {
             console.log('📍 No features found at click point')
