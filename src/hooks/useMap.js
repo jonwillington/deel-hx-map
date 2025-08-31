@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback } from 'react'
 import mapboxgl from 'mapbox-gl'
 import { geocode, calculateAnimationDuration } from '../utils/mapboxUtils'
 import { formatPopupDate } from '../utils/dateUtils'
+import { getMapColors } from '../utils/colorUtils'
 
 mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1Ijoiam9uYXRoYW53aWxsaW5ndG9uIiwiYSI6ImNsZ2Z5Z2Z5Z2Z5Z2Z5Z2Z5Z2Z5Z2Z5Z2Z5In0.example'
 
@@ -172,7 +173,7 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
         source: 'locations',
         filter: ['has', 'point_count'],
         paint: {
-          'circle-color': '#ffdb5f',
+          'circle-color': getMapColors().markerColor,
           'circle-radius': [
             'step',
             ['get', 'point_count'],
@@ -206,10 +207,10 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
         source: 'locations',
         filter: ['!', ['has', 'point_count']],
         paint: {
-          'circle-color': '#ffdb5f',
+          'circle-color': getMapColors().markerColor,
           'circle-radius': 8,
           'circle-stroke-width': 2,
-          'circle-stroke-color': '#000'
+          'circle-stroke-color': getMapColors().markerStroke
         }
       })
       
@@ -392,7 +393,7 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
           source: 'locations',
           filter: ['has', 'point_count'],
           paint: {
-            'circle-color': '#ffdb5f',
+            'circle-color': getMapColors().markerColor,
             'circle-radius': [
               'step',
               ['get', 'point_count'],
@@ -426,10 +427,10 @@ export const useMap = (locations, onLocationSelect, loading, isAuthenticated = t
           source: 'locations',
           filter: ['!', ['has', 'point_count']],
           paint: {
-            'circle-color': '#ffdb5f',
+            'circle-color': getMapColors().markerColor,
             'circle-radius': 8,
             'circle-stroke-width': 2,
-            'circle-stroke-color': '#000'
+            'circle-stroke-color': getMapColors().markerStroke
           }
         })
 

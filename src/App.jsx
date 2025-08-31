@@ -8,6 +8,8 @@ import { MapComponent } from './components/Map/MapComponent'
 import { PremiumCard } from './components/PremiumCard'
 import { PasswordPage } from './components/PasswordPage'
 import { DevTools } from './components/DevTools'
+import { ThemeProvider } from './contexts/ThemeContext'
+import { ThemeToggle } from './components/ThemeToggle'
 import { getImageEmbedInstructions } from './utils/imageUtils'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import 'flag-icons/css/flag-icons.min.css'
@@ -125,7 +127,7 @@ function App() {
   }
 
   return (
-    <>
+    <ThemeProvider>
       {/* Mobile message for screens < 600px */}
       <div className="mobile-message">
         <h2>Currently only supported on Desktop!</h2>
@@ -235,7 +237,7 @@ function App() {
           </div>
         </div>
       )}
-    </>
+    </ThemeProvider>
   )
 }
 

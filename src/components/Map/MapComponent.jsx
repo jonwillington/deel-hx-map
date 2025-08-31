@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { ThemeToggle } from '../ThemeToggle'
 
 /**
  * Map component for displaying the interactive map
@@ -39,9 +40,9 @@ export const MapComponent = ({ locations, onLocationSelect, loading, error, mapR
           top: '37px', 
           height: '34px',
           padding: '0 16px', 
-          background: '#1a0d3f', 
+          background: 'var(--color-map-bg-light)', 
           borderRadius: 8, 
-          boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+          boxShadow: '0 2px 10px var(--color-shadow-sm-light)',
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
@@ -68,10 +69,10 @@ export const MapComponent = ({ locations, onLocationSelect, loading, error, mapR
           left: 16, 
           top: 12, 
           padding: '8px', 
-          background: '#fee', 
-          color: '#900', 
+          background: 'var(--color-danger-bg-light)', 
+          color: 'var(--color-danger-text-light)', 
           borderRadius: 6, 
-          boxShadow: '0 2px 10px rgba(0,0,0,0.1)' 
+          boxShadow: '0 2px 10px var(--color-shadow-sm-light)' 
         }}>
           {error}
         </div>
@@ -93,6 +94,7 @@ export const MapComponent = ({ locations, onLocationSelect, loading, error, mapR
       
       <div className="feedback-bar">
         <div className="feedback-bar-left">
+          <ThemeToggle />
           <a href="https://docs.google.com/spreadsheets/d/14YSy-w-db4rqXa1nHyaPZCVp7Qcd3UcOBJOqfZXENdo/edit?usp=sharing" target="_blank" rel="noopener noreferrer">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="m18 2 4 4-12 12H6v-4L18 2z"/>

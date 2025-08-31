@@ -153,7 +153,7 @@ export const PremiumCard = ({ location, onClose, isClosing, segment, rowIndex = 
           />
         ) : null}
         <div className="premium-card-placeholder" style={{ display: (imageUrl && !imageLoading) ? 'none' : 'flex' }}>
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="#e0e0e0">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="var(--color-text-disabled-light)">
             <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
           </svg>
         </div>
@@ -189,7 +189,7 @@ export const PremiumCard = ({ location, onClose, isClosing, segment, rowIndex = 
                         style={{ 
                           background: 'none',
                           border: 'none',
-                          color: 'rgb(34, 0, 140)',
+                          color: 'var(--color-text-primary-light)',
                           cursor: 'pointer',
                           fontSize: 'inherit',
                           fontWeight: '600',

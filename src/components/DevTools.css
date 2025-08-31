@@ -4,7 +4,7 @@
   right: 20px;
   width: 50px;
   height: 50px;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--color-shadow-xl-light);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -17,12 +17,12 @@
 }
 
 .dev-tools-toggle:hover {
-  background: rgba(0, 0, 0, 0.9);
+  background: var(--color-shadow-xl-light);
   transform: scale(1.1);
 }
 
 .dev-tools-toggle.open {
-  background: #667eea;
+  background: var(--color-accent-light);
 }
 
 .dev-tools-panel {
@@ -30,27 +30,27 @@
   top: 80px;
   right: 20px;
   width: 200px;
-  background: white;
+  background: var(--color-bg-primary-light);
   border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 30px var(--color-shadow-xl-light);
   z-index: 9999;
   overflow: hidden;
 }
 
 .dev-tools-header {
-  background: #f8f9fa;
+  background: var(--color-bg-secondary-light);
   padding: 15px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--color-border-divider-light);
 }
 
 .dev-tools-header h4 {
   margin: 0;
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-heading-light);
 }
 
 .close-btn {
@@ -58,7 +58,7 @@
   border: none;
   font-size: 18px;
   cursor: pointer;
-  color: #666;
+  color: var(--color-text-secondary-light);
   padding: 0;
   width: 20px;
   height: 20px;
@@ -68,7 +68,7 @@
 }
 
 .close-btn:hover {
-  color: #333;
+  color: var(--color-text-heading-light);
 }
 
 .dev-tools-content {
@@ -93,32 +93,32 @@
 }
 
 .logout-btn {
-  background: #ff4757;
-  color: white;
+  background: var(--color-warning-light);
+  color: var(--color-text-inverse-light);
 }
 
 .logout-btn:hover {
-  background: #ff3742;
+  background: var(--color-warning-hover-light);
 }
 
 .auth-btn {
-  background: #667eea;
-  color: white;
+  background: var(--color-accent-light);
+  color: var(--color-text-inverse-light);
 }
 
 .auth-btn:hover {
-  background: #5a6fd8;
+  background: var(--color-accent-hover-light);
 }
 
 .dev-info {
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px solid #e9ecef;
+  border-top: 1px solid var(--color-border-divider-light);
   text-align: center;
 }
 
 .dev-info small {
-  color: #666;
+  color: var(--color-text-secondary-light);
   font-size: 11px;
 }
 

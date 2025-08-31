@@ -1,0 +1,220 @@
+/* Design Tokens - Color System */
+
+:root {
+  /* Base Colors */
+  --color-white: #ffffff;
+  --color-black: #000000;
+  
+  /* Light Theme Colors */
+  --color-primary-light: #646cff;
+  --color-primary-hover-light: #535bf2;
+  --color-primary-focus-light: #747bff;
+  --color-primary-blue-light: #007aff;
+  --color-primary-blue-focus-light: rgba(0, 122, 255, 0.1);
+  
+  --color-accent-light: #667eea;
+  --color-accent-hover-light: #5a6fd8;
+  --color-accent-purple-light: rgb(196, 177, 249);
+  --color-accent-yellow-light: #ffdb5f;
+  --color-accent-green-light: #4A90E2;
+  
+  --color-danger-light: #e74c3c;
+  --color-danger-bg-light: #fee;
+  --color-danger-text-light: #900;
+  --color-danger-focus-light: rgba(231, 76, 60, 0.1);
+  --color-warning-light: #ff4757;
+  --color-warning-hover-light: #ff3742;
+  
+  --color-success-light: #61DAFB;
+  
+  /* Background Colors */
+  --color-bg-primary-light: #ffffff;
+  --color-bg-secondary-light: #f8f9fa;
+  --color-bg-tertiary-light: #f5f5f5;
+  --color-bg-card-light: rgba(255, 255, 255, 0.95);
+  --color-bg-modal-light: rgba(255, 255, 255, 0.98);
+  --color-bg-overlay-light: rgba(255, 255, 255, 0.9);
+  --color-bg-hover-light: rgba(0, 0, 0, 0.02);
+  --color-bg-active-light: rgba(0, 0, 0, 0.05);
+  --color-bg-disabled-light: rgba(200, 200, 200, 0.3);
+  --color-bg-gradient-light: rgba(255, 255, 255, 0.6);
+  
+  /* Text Colors */
+  --color-text-primary-light: #1a1a1a;
+  --color-text-secondary-light: #666666;
+  --color-text-tertiary-light: #888888;
+  --color-text-quaternary-light: #6d6d70;
+  --color-text-disabled-light: #9ca3af;
+  --color-text-inverse-light: #ffffff;
+  --color-text-body-light: #213547;
+  --color-text-heading-light: #333333;
+  --color-text-muted-light: #555555;
+  
+  /* Border Colors */
+  --color-border-primary-light: rgba(0, 0, 0, 0.1);
+  --color-border-secondary-light: rgba(0, 0, 0, 0.05);
+  --color-border-tertiary-light: rgba(0, 0, 0, 0.08);
+  --color-border-input-light: #e1e5e9;
+  --color-border-input-focus-light: #667eea;
+  --color-border-card-light: rgba(255, 255, 255, 0.2);
+  --color-border-modal-light: rgba(255, 255, 255, 0.3);
+  --color-border-divider-light: #e9ecef;
+  
+  /* Shadow Colors */
+  --color-shadow-sm-light: rgba(0, 0, 0, 0.1);
+  --color-shadow-md-light: rgba(0, 0, 0, 0.12);
+  --color-shadow-lg-light: rgba(0, 0, 0, 0.15);
+  --color-shadow-xl-light: rgba(0, 0, 0, 0.2);
+  --color-shadow-card-light: rgba(0, 0, 0, 0.08);
+  
+  /* Map Specific Colors */
+  --color-map-marker-light: #ffdb5f;
+  --color-map-marker-stroke-light: #000000;
+  --color-map-text-light: #000000;
+  --color-map-bg-light: #1a0d3f;
+}
+
+/* Dark Theme Colors (system preference)
+   Apply ONLY when no explicit data-theme attribute is set */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    /* Primary Colors - adjusted for dark theme */
+    --color-primary-light: #7c85ff;
+    --color-primary-hover-light: #646cff;
+    --color-primary-focus-light: #9ca5ff;
+    --color-primary-blue-light: #0a84ff;
+    --color-primary-blue-focus-light: rgba(10, 132, 255, 0.2);
+    
+    --color-accent-light: #7c8cff;
+    --color-accent-hover-light: #6b7fff;
+    --color-accent-purple-light: rgb(216, 197, 255);
+    --color-accent-yellow-light: #ffd95f;
+    --color-accent-green-light: #5a9fff;
+    
+    --color-danger-light: #ff5555;
+    --color-danger-bg-light: #2d1b1b;
+    --color-danger-text-light: #ff8080;
+    --color-danger-focus-light: rgba(255, 85, 85, 0.2);
+    --color-warning-light: #ff6b7d;
+    --color-warning-hover-light: #ff5252;
+    
+    --color-success-light: #4fd1c7;
+    
+    /* Background Colors */
+    --color-bg-primary-light: #1a1a1a;
+    --color-bg-secondary-light: #2a2a2a;
+    --color-bg-tertiary-light: #333333;
+    --color-bg-card-light: rgba(42, 42, 42, 0.95);
+    --color-bg-modal-light: rgba(26, 26, 26, 0.98);
+    --color-bg-overlay-light: rgba(42, 42, 42, 0.9);
+    --color-bg-hover-light: rgba(255, 255, 255, 0.05);
+    --color-bg-active-light: rgba(255, 255, 255, 0.1);
+    --color-bg-disabled-light: rgba(80, 80, 80, 0.3);
+    --color-bg-gradient-light: rgba(42, 42, 42, 0.6);
+    
+    /* Text Colors */
+    --color-text-primary-light: #ffffff;
+    --color-text-secondary-light: #e0e0e0;
+    --color-text-tertiary-light: #b0b0b0;
+    --color-text-quaternary-light: #9ca3af;
+    --color-text-disabled-light: #666666;
+    --color-text-inverse-light: #1a1a1a;
+    --color-text-body-light: rgba(255, 255, 255, 0.87);
+    --color-text-heading-light: #ffffff;
+    --color-text-muted-light: #b0b0b0;
+    
+    /* Border Colors */
+    --color-border-primary-light: rgba(255, 255, 255, 0.1);
+    --color-border-secondary-light: rgba(255, 255, 255, 0.05);
+    --color-border-tertiary-light: rgba(255, 255, 255, 0.08);
+    --color-border-input-light: rgba(255, 255, 255, 0.2);
+    --color-border-input-focus-light: #7c8cff;
+    --color-border-card-light: rgba(255, 255, 255, 0.1);
+    --color-border-modal-light: rgba(255, 255, 255, 0.15);
+    --color-border-divider-light: rgba(255, 255, 255, 0.1);
+    
+    /* Shadow Colors */
+    --color-shadow-sm-light: rgba(0, 0, 0, 0.3);
+    --color-shadow-md-light: rgba(0, 0, 0, 0.4);
+    --color-shadow-lg-light: rgba(0, 0, 0, 0.5);
+    --color-shadow-xl-light: rgba(0, 0, 0, 0.6);
+    --color-shadow-card-light: rgba(0, 0, 0, 0.3);
+    
+    /* Map Specific Colors */
+    --color-map-marker-light: #ffd95f;
+    --color-map-marker-stroke-light: #ffffff;
+    --color-map-text-light: #ffffff;
+    --color-map-bg-light: #2d1a5f;
+  }
+}
+
+/* Manual dark mode class override */
+[data-theme="dark"] {
+  /* Primary Colors - adjusted for dark theme */
+  --color-primary-light: #7c85ff;
+  --color-primary-hover-light: #646cff;
+  --color-primary-focus-light: #9ca5ff;
+  --color-primary-blue-light: #0a84ff;
+  --color-primary-blue-focus-light: rgba(10, 132, 255, 0.2);
+  
+  --color-accent-light: #7c8cff;
+  --color-accent-hover-light: #6b7fff;
+  --color-accent-purple-light: rgb(216, 197, 255);
+  --color-accent-yellow-light: #ffd95f;
+  --color-accent-green-light: #5a9fff;
+  
+  --color-danger-light: #ff5555;
+  --color-danger-bg-light: #2d1b1b;
+  --color-danger-text-light: #ff8080;
+  --color-danger-focus-light: rgba(255, 85, 85, 0.2);
+  --color-warning-light: #ff6b7d;
+  --color-warning-hover-light: #ff5252;
+  
+  --color-success-light: #4fd1c7;
+  
+  /* Background Colors */
+  --color-bg-primary-light: #1a1a1a;
+  --color-bg-secondary-light: #2a2a2a;
+  --color-bg-tertiary-light: #333333;
+  --color-bg-card-light: rgba(42, 42, 42, 0.95);
+  --color-bg-modal-light: rgba(26, 26, 26, 0.98);
+  --color-bg-overlay-light: rgba(42, 42, 42, 0.9);
+  --color-bg-hover-light: rgba(255, 255, 255, 0.05);
+  --color-bg-active-light: rgba(255, 255, 255, 0.1);
+  --color-bg-disabled-light: rgba(80, 80, 80, 0.3);
+  --color-bg-gradient-light: rgba(42, 42, 42, 0.6);
+  
+  /* Text Colors */
+  --color-text-primary-light: #ffffff;
+  --color-text-secondary-light: #e0e0e0;
+  --color-text-tertiary-light: #b0b0b0;
+  --color-text-quaternary-light: #9ca3af;
+  --color-text-disabled-light: #666666;
+  --color-text-inverse-light: #1a1a1a;
+  --color-text-body-light: rgba(255, 255, 255, 0.87);
+  --color-text-heading-light: #ffffff;
+  --color-text-muted-light: #b0b0b0;
+  
+  /* Border Colors */
+  --color-border-primary-light: rgba(255, 255, 255, 0.1);
+  --color-border-secondary-light: rgba(255, 255, 255, 0.05);
+  --color-border-tertiary-light: rgba(255, 255, 255, 0.08);
+  --color-border-input-light: rgba(255, 255, 255, 0.2);
+  --color-border-input-focus-light: #7c8cff;
+  --color-border-card-light: rgba(255, 255, 255, 0.1);
+  --color-border-modal-light: rgba(255, 255, 255, 0.15);
+  --color-border-divider-light: rgba(255, 255, 255, 0.1);
+  
+  /* Shadow Colors */
+  --color-shadow-sm-light: rgba(0, 0, 0, 0.3);
+  --color-shadow-md-light: rgba(0, 0, 0, 0.4);
+  --color-shadow-lg-light: rgba(0, 0, 0, 0.5);
+  --color-shadow-xl-light: rgba(0, 0, 0, 0.6);
+  --color-shadow-card-light: rgba(0, 0, 0, 0.3);
+  
+  /* Map Specific Colors */
+  --color-map-marker-light: #ffd95f;
+  --color-map-marker-stroke-light: #ffffff;
+  --color-map-text-light: #ffffff;
+  --color-map-bg-light: #2d1a5f;
+}
