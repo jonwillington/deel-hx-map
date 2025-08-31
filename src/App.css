@@ -663,7 +663,7 @@ body {
 }
 
 .feedback-bar-left a:hover {
-  color: var(--color-text-inverse-light);
+  color: var(--color-text-primary-light);
 }
 
 .feedback-bar-left .interpunct {
@@ -685,7 +685,7 @@ body {
 }
 
 .feedback-bar-right a:hover {
-  color: var(--color-text-inverse-light);
+  color: var(--color-text-primary-light);
 }
 
 .small-card {
